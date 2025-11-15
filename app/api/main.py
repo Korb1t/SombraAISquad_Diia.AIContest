@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.routes import utils, classify  # Add classify here
+from app.api.routes import utils, classify
 
 api_router = APIRouter()
 

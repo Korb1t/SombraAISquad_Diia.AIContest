@@ -2,9 +2,6 @@ from langchain_core.prompts import ChatPromptTemplate
 from app.llm.client import get_llm
 from app.llm.prompts import LETTER_SYSTEM_PROMPT, LETTER_USER_PROMPT
 
-# DO NOT create LLM here!
-# _llm = get_llm()  ← Removed
-
 _letter_prompt = ChatPromptTemplate.from_messages(
     [
         ("system", LETTER_SYSTEM_PROMPT),
