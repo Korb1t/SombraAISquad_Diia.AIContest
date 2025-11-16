@@ -1,16 +1,14 @@
-import os
 from openai import OpenAI
+from app.core.config import settings
 
 
 def _create_openai_client() -> OpenAI:
-    """Create and configure OpenAI client"""
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        raise ValueError(f"OPENAI_API_KEY not found! Available vars: {list(os.environ.keys())[:10]}")
-    
+    """
+    Create and configure OpenAI client
+    """
     return OpenAI(
-        api_key=api_key,
-        base_url=os.environ.get("OPENAI_API_BASE", "https://codemie.lab.epam.com/llms"),
+        api_key=settings.OPENAI_API_KEY,
+        base_url=settings.OPENAI_API_BASE,
     )
 
 
@@ -19,7 +17,7 @@ class SimpleLLM:
     
     def __init__(self):
         self.client = _create_openai_client()
-        self.model = os.environ.get("MODEL_NAME", "gpt-5-mini-2025-08-07")
+        self.model = settings.MODEL_NAME
     
     def invoke(self, prompt: str) -> str:
         """Invoke LLM with prompt"""
@@ -41,7 +39,7 @@ class SimpleEmbeddings:
     
     def __init__(self):
         self.client = _create_openai_client()
-        self.model = os.environ.get("EMBEDDING_MODEL", "codemie-text-embedding-ada-002")
+        self.model = settings.EMBEDDING_MODEL
     
     def embed_query(self, text: str) -> list[float]:
         """Generate embedding for text"""
