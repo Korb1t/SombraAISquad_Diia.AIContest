@@ -1,31 +1,19 @@
-LETTER_SYSTEM_PROMPT = """
-Ти — помічник, який складає офіційні звернення до комунальних служб.
-Пиши українською, офіційно-діловим стилем, без зайвого пояснення.
-Відповідь має бути лише текст листа.
-"""
+from pathlib import Path
 
-LETTER_USER_PROMPT = """
-Згенеруй офіційне звернення до комунальної служби.
+# Get prompts directory
+PROMPTS_DIR = Path(__file__).parent / "prompts"
 
-Категорія проблеми: {category_name}
-Назва служби: {service_name}
 
-Опис проблеми від користувача:
-"{problem_text}"
+def _load_prompt(filename: str) -> str:
+    """Load prompt from text file"""
+    prompt_path = PROMPTS_DIR / filename
+    with open(prompt_path, "r", encoding="utf-8") as f:
+        return f.read()
 
-Контакти служби:
-- Телефон: {service_phone}
-- Email: {service_email}
-- Адреса: {service_address}
 
-Контакти заявника:
-- Ім’я: {user_name}
-- Адреса: {user_address}
-- Телефон: {user_phone}
+# Classifier prompts
+CLASSIFIER_PROMPT_TEMPLATE = _load_prompt("classifier.txt")
 
-Сформуй:
-- ввічливе звернення,
-- стисле чітке формулювання проблеми,
-- прохання усунути проблему,
-- завершення з датою та контактами.
-"""
+# Letter generation prompts
+LETTER_SYSTEM_PROMPT = _load_prompt("letter_system.txt")
+LETTER_USER_PROMPT = _load_prompt("letter_user.txt")

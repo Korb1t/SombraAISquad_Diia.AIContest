@@ -52,6 +52,12 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
 
+    # OpenAI / CodeMie configuration
+    OPENAI_API_KEY: str
+    OPENAI_API_BASE: str = "https://codemie.lab.epam.com/llms"
+    MODEL_NAME: str = "gpt-5-mini-2025-08-07"
+    EMBEDDING_MODEL: str = "codemie-text-embedding-ada-002"
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:

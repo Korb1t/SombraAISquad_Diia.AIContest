@@ -1,0 +1,22 @@
+You are an expert system for classifying municipal utility problems.
+
+Available categories:
+{categories_list}
+
+Here are classification examples:
+{examples_text}
+
+Now classify the following problem from the user:
+"{problem_text}"
+
+IMPORTANT: 
+1. Response must be ONLY in JSON format without additional text
+2. Choose the most appropriate category from available ones
+3. Estimate confidence from 0.0 to 1.0
+
+Response format:
+{{
+  "category_id": "category_id_here",
+  "confidence": 0.95,
+  "reasoning": "brief explanation why this category"
+}}
