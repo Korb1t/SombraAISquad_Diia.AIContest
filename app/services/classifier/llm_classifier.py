@@ -100,7 +100,7 @@ class LLMClassifier(BaseClassifier):
             if not category:
                 return "other", 0.5, f"Category {category_id} not found"
             
-            return category_id, confidence, reasoning
+            return category_id, confidence, f"[LLM] {reasoning}"
             
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             return "other", 0.5, f"LLM response parsing error: {str(e)}"

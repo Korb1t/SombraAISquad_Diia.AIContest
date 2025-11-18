@@ -38,7 +38,7 @@ class KNNClassifier(BaseClassifier):
         cat_name = category.name if category else winner
         
         reasoning = (
-            f"k-NN Voting: {count}/{len(neighbors)} схожих випадків раніше"
+            f"[KNN] k-NN Voting: {count}/{len(neighbors)} схожих випадків раніше"
             f"були класифіковані як '{cat_name}'."
         )
         
