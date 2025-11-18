@@ -1,8 +1,9 @@
 
 from typing import Tuple
 from collections import Counter
-
 from sqlmodel import Session, select
+
+from app.core.config import settings
 from app.db_models import Example
 from app.llm.client import get_embeddings
 from app.services.classifier.base_classifier import BaseClassifier
@@ -17,12 +18,11 @@ class KNNClassifier(BaseClassifier):
 
     def classify(self, problem_text: str) -> Tuple[str, float, str]:
         query_embedding = self.embeddings.embed_query(problem_text)
-        
-        # Get 7 nearest neighbors (odd number helps avoid ties)
+
         statement = (
             select(Example)
             .order_by(Example.embedding.cosine_distance(query_embedding))
-            .limit(7)
+            .limit(settings.TOP_K)
         )
         neighbors = self.session.exec(statement).all()
         
@@ -38,7 +38,7 @@ class KNNClassifier(BaseClassifier):
         cat_name = category.name if category else winner
         
         reasoning = (
-            f"[KNN] k-NN Voting: {count}/{len(neighbors)} схожих випадків раніше"
+            f"[KNN] k-NN Voting: {count}/{len(neighbors)} схожих випадків раніше "
             f"були класифіковані як '{cat_name}'."
         )
         

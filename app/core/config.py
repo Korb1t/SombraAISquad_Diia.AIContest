@@ -64,6 +64,8 @@ class Settings(BaseSettings):
     # Used by 'hybrid' mode to decide when to fallback to LLM.
     CLASSIFIER_THRESHOLD: float = 0.4
 
+    TOP_K: int = 7
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
