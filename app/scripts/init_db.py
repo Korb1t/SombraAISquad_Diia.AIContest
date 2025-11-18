@@ -12,7 +12,7 @@ load_dotenv()
 
 from app.core.config import settings
 from app.llm.client import get_embeddings
-from app.models import Category, Example
+from app.db_models import Category, Example
 
 
 def init_pgvector_extension(engine):
