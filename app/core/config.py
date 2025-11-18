@@ -20,7 +20,7 @@ def parse_cors(v: Any) -> list[str] | str:
         return v
     raise ValueError(v)
 
-
+# TO-DO: separate environment-specific settings?
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -57,6 +57,12 @@ class Settings(BaseSettings):
     OPENAI_API_BASE: str = "https://codemie.lab.epam.com/llms"
     MODEL_NAME: str = "gpt-5-mini-2025-08-07"
     EMBEDDING_MODEL: str = "codemie-text-embedding-ada-002"
+
+    CLASSIFIER_TYPE: Literal["knn", "llm", "hybrid"] = "knn"
+    
+    # Minimum confidence score (0.0 - 1.0). 
+    # Used by 'hybrid' mode to decide when to fallback to LLM.
+    CLASSIFIER_THRESHOLD: float = 0.4
 
     @computed_field  # type: ignore[prop-decorator]
     @property
