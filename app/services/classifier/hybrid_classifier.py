@@ -1,9 +1,12 @@
+import logging
 from sqlmodel import Session
 from typing import Tuple
 
 from app.services.classifier.base_classifier import BaseClassifier
 from app.services.classifier.knn_classifier import KNNClassifier
 from app.services.classifier.llm_classifier import LLMClassifier
+
+logger = logging.getLogger(__name__)
 
 
 class HybridClassifier(BaseClassifier):
@@ -26,11 +29,12 @@ class HybridClassifier(BaseClassifier):
         cat_id, confidence, reasoning = self.knn_strategy.classify(problem_text)
 
         if confidence >= self.threshold:
-            # TO-DO: Remove tags in production.
             return cat_id, confidence, f"[Hybrid-Fast] {reasoning}"
 
-        # TO-DO: Add some logger.
-        print(f"Hybrid Fallback: KNN confidence {confidence} < {self.threshold}. Перехід до класифікації LLM..")
+        logger.info(
+            f"Hybrid Fallback: KNN confidence {confidence} < {self.threshold}. "
+            "Перехід до класифікації LLM.."
+        )
         
         llm_cat, llm_conf, llm_reason = self.llm_strategy.classify(problem_text)
 
