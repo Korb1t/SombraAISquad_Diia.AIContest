@@ -4,6 +4,7 @@ from sqlmodel import Session, select
 
 from app.llm.client import get_llm, get_embeddings
 from app.llm.prompts import CLASSIFIER_PROMPT_TEMPLATE
+from app.llm.prompts import URGENCY_CHECK_PROMPT
 from app.db_models import Category, Example
 
 
@@ -20,6 +21,36 @@ class ProblemClassifier:
         if self.llm is None:
             self.llm = get_llm()
         return self.llm
+    
+    def check_urgency(self, problem_text: str) -> bool:
+        """
+        Check if problem is urgent/emergency using LLM
+        
+        Analyzes problem text to determine if immediate action is required.
+        Examples: gas leak, fire, flooding, collapse → urgent
+        
+        Returns:
+            bool: True if urgent, False otherwise
+        """
+        
+        prompt = URGENCY_CHECK_PROMPT.format(problem_text=problem_text)
+        llm = self._get_llm()
+        response = llm.invoke(prompt)
+        
+        try:
+            content = response.content.strip()
+            if content.startswith("```"):
+                content = content.split("```")[1]
+                if content.startswith("json"):
+                    content = content[4:]
+                content = content.strip()
+            
+            result = json.loads(content)
+            return bool(result.get("is_urgent", False))
+            
+        except (json.JSONDecodeError, KeyError, ValueError):
+            # Default to not urgent if parsing fails
+            return False
     
     def _get_similar_examples(self, problem_text: str, top_k: int = 5) -> list[Example]:
         """Find most similar examples through vector search"""
@@ -112,8 +143,16 @@ class ProblemClassifier:
     
     def classify_with_category(self, problem_text: str) -> dict:
         """
-        Classify problem and return full response with category info
+        Classify problem and return full response with category info and urgency check
+        
+        Performs two-step analysis:
+        1. Urgency detection via LLM
+        2. Category classification via RAG + few-shot learning
         """
+        # Check urgency first
+        is_urgent = self.check_urgency(problem_text)
+        
+        # Then classify category
         category_id, confidence, reasoning = self.classify(problem_text)
         category = self.get_category_info(category_id)
         
@@ -125,7 +164,8 @@ class ProblemClassifier:
             "category_name": category.name,
             "category_description": category.description,
             "confidence": confidence,
-            "reasoning": reasoning
+            "reasoning": reasoning,
+            "is_urgent": is_urgent
         }
 
 

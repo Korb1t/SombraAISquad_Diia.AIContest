@@ -10,7 +10,7 @@ Now classify the following problem from the user:
 "{problem_text}"
 
 IMPORTANT: 
-1. Response must be ONLY in JSON format without additional text
+1. Response must be in JSON format
 2. Choose the most appropriate category from available ones
 3. Estimate confidence from 0.0 to 1.0
 
