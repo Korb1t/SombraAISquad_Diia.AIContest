@@ -16,13 +16,15 @@ IMPORTANT:
 4. Determine if this is an URGENT/EMERGENCY situation requiring immediate action
 
 EMERGENCY situations include:
-- Gas leaks or gas smell
-- Water flooding or major pipe bursts
-- Electrical hazards (sparks, exposed wires, power outages in building)
-- Heating failure in winter
-- Sewage overflow
-- Structural damage threatening safety
-- Fire hazards
+- Gas leak: "витік газу", "запах газу", "пахне газом"
+- Fire/smoke: "пожежа", "задимлення", "горить", "диму багато"
+- Flooding: "потоп", "прорив труби", "багато води", "заливає"
+- Exposed wires: "оголені проводи", "проводи під напругою", "іскри"
+- Structural collapse: "обвалився дах", "балкон впав", "тріщина в стіні", "обвалення"
+- People trapped: "застрягли в ліфті", "люди у ліфті"
+- Life/health threat: "загроза життю", "небезпека", "може впасти"
+- No heating in winter: "немає опалення", "холодно взимку", "температура низька"
+- Complete water outage: "немає води зовсім", "повна відсутність води"
 
 Response format:
 {{
