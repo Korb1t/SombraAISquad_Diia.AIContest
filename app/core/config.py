@@ -52,15 +52,12 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
 
-    # OpenAI / CodeMie configuration
-    OPENAI_API_KEY: str
-    OPENAI_API_BASE: str = "https://codemie.lab.epam.com/llms"
-    MODEL_NAME: str = "gpt-5-mini-2025-08-07"
-    EMBEDDING_MODEL: str = "codemie-text-embedding-ada-002"
-    
-    # Google Gemini configuration
-    GEMINI_API_KEY: str
-    GEMINI_MODEL: str = "gemini-2.5-flash"
+    # CodeMie configuration
+    CODEMIE_API_KEY: str
+    CODEMIE_API_BASE: str = "https://codemie.lab.epam.com/llms"
+    CODEMIE_LLM_MODEL: str = "gpt-5-mini-2025-08-07"
+    CODEMIE_EMBEDDING_MODEL: str = "codemie-text-embedding-ada-002"
+    CODEMIE_TRANSCRIPTION_MODEL: str = "gemini-2.5-flash"
 
     CLASSIFIER_TYPE: Literal["knn", "llm", "hybrid"] = "knn"
     
