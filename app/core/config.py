@@ -57,6 +57,10 @@ class Settings(BaseSettings):
     OPENAI_API_BASE: str = "https://codemie.lab.epam.com/llms"
     MODEL_NAME: str = "gpt-5-mini-2025-08-07"
     EMBEDDING_MODEL: str = "codemie-text-embedding-ada-002"
+    
+    # Google Gemini configuration
+    GEMINI_API_KEY: str
+    GEMINI_MODEL: str = "gemini-2.5-flash"
 
     CLASSIFIER_TYPE: Literal["knn", "llm", "hybrid"] = "knn"
     
