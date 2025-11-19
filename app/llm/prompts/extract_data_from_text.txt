@@ -9,9 +9,18 @@ Extract the following information:
 4. user_city - city name if mentioned
 5. user_phone - contact phone number if mentioned
 
+FORMATTING RULES:
+- user_name: "Прізвище Ім'я" or "Прізвище Ім'я По-батькові" (capitalize each word)
+- user_address: "вулиця/провулок Name Number, квартира X" (lowercase street type, capitalize street name)
+  Examples: "вулиця Хрещатик 10, квартира 5", "провулок Шевченка 3"
+- user_city: Capitalize first letter (e.g., "Київ", "Львів", "Харків")
+- user_phone: Always format as "+380XXXXXXXXX" (remove spaces, dashes, parentheses)
+  Examples: "0501234567" → "+380501234567", "+38 050 123 45 67" → "+380501234567"
+
 IMPORTANT:
 - If some field is not mentioned, use null
-- Phone format: any format is acceptable
+- Always normalize phone numbers to +380 format
+- Keep address format consistent
 - Return ONLY valid JSON, no markdown, no extra text
 
 Example output:
