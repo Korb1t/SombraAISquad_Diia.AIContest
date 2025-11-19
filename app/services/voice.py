@@ -5,7 +5,7 @@ from typing import BinaryIO
 from app.llm.client import get_gemini_client, get_llm
 from app.llm.utils import parse_llm_json
 from app.llm.prompts import AUDIO_TRANSCRIPTION_PROMPT, EXTRACT_DATA_FROM_TEXT_PROMPT
-from app.schemas.problems import ProblemRequest
+from app.schemas.voice import ExtractedProblemData
 
 
 class VoiceService:
@@ -27,16 +27,17 @@ class VoiceService:
         
         return response.text.strip()
     
-    def extract_data_from_text(self, text: str) -> ProblemRequest:
+    def extract_data_from_text(self, text: str) -> ExtractedProblemData:
         """Extract structured data from user-edited text using LLM"""
         prompt = EXTRACT_DATA_FROM_TEXT_PROMPT.format(text=text)
         response = self.llm.invoke(prompt)
         data = parse_llm_json(response.content)
         
-        return ProblemRequest(
+        return ExtractedProblemData(
             problem_text=data.get("problem_text") or text,
             user_name=data.get("user_name"),
             user_address=data.get("user_address"),
+            user_city=data.get("user_city"),
             user_phone=data.get("user_phone")
         )
 
