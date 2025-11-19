@@ -26,21 +26,21 @@ class HybridClassifier(BaseClassifier):
         """
         Orchestrates the classification flow.
         """
-        cat_id, confidence, reasoning = self.knn_strategy.classify(problem_text)
+        cat_id, confidence, reasoning, is_urgent = self.knn_strategy.classify(problem_text)
 
         if confidence >= self.threshold:
-            return cat_id, confidence, f"[Hybrid-Fast] {reasoning}"
+            return cat_id, confidence, f"[Hybrid-Fast] {reasoning}", is_urgent
 
         logger.info(
             f"Hybrid Fallback: KNN confidence {confidence} < {self.threshold}. "
             "Перехід до класифікації LLM.."
         )
         
-        llm_cat, llm_conf, llm_reason = self.llm_strategy.classify(problem_text)
+        llm_cat, llm_conf, llm_reason, llm_is_urgent = self.llm_strategy.classify(problem_text)
 
         final_reasoning = (
             f"[Hybrid-Deep] {llm_reason} "
             f"(Викликано після невдалої спроби KNN: confidence було лише {confidence:.2f})"
         )
         
-        return llm_cat, llm_conf, final_reasoning
+        return llm_cat, llm_conf, final_reasoning, llm_is_urgent

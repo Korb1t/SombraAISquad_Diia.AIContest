@@ -23,6 +23,7 @@ class ProblemClassificationResponse(BaseModel):
     category_description: str = Field(..., description="Category description")
     confidence: float = Field(..., description="Classification confidence (0.0-1.0)")
     reasoning: str = Field(..., description="Explanation why this category was chosen")
+    is_urgent: bool = Field(..., description="Is this an urgent/emergency problem?")
 
 
 class ServiceInfo(BaseModel):
@@ -37,5 +38,6 @@ class ProblemResponse(BaseModel):
     category_id: str
     category_name: str
     confidence: float
+    is_urgent: bool
     service: ServiceInfo
     letter_text: str

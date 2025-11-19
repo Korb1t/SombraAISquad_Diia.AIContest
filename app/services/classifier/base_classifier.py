@@ -21,7 +21,7 @@ class BaseClassifier(ABC):
 
     def classify_with_category(self, problem_text: str) -> dict:
         """Shared logic for formatting the final response"""
-        category_id, confidence, reasoning = self.classify(problem_text)
+        category_id, confidence, reasoning, is_urgent = self.classify(problem_text)
         
         if category_id == "other":
              return {
@@ -29,7 +29,8 @@ class BaseClassifier(ABC):
                 "category_name": "Uncategorized",
                 "category_description": "Could not determine specific category",
                 "confidence": confidence,
-                "reasoning": reasoning
+                "reasoning": reasoning,
+                "is_urgent": False
             }
 
         category = self.get_category_info(category_id)
@@ -40,7 +41,8 @@ class BaseClassifier(ABC):
                 "category_name": "Unknown", 
                 "category_description": "Category ID exists in model but not DB",
                 "confidence": confidence,
-                "reasoning": reasoning
+                "reasoning": reasoning,
+                "is_urgent": False
             }
         
         return {
@@ -48,5 +50,6 @@ class BaseClassifier(ABC):
             "category_name": category.name,
             "category_description": category.description,
             "confidence": confidence,
-            "reasoning": reasoning
+            "reasoning": reasoning,
+            "is_urgent": is_urgent
         }

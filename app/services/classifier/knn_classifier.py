@@ -41,5 +41,9 @@ class KNNClassifier(BaseClassifier):
             f"[KNN] k-NN Voting: {count}/{len(neighbors)} схожих випадків раніше "
             f"були класифіковані як '{cat_name}'."
         )
-        
-        return winner, round(confidence, 2), reasoning
+
+        # Todo: ML urgency detection should be added later
+        is_urgent = False
+
+        return winner, round(confidence, 2), reasoning, is_urgent
+
