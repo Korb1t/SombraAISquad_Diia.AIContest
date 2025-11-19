@@ -16,6 +16,17 @@ class ProblemRequest(BaseModel):
         return v.strip()
 
 
+class VoiceTranscriptionResponse(BaseModel):
+    """Response from voice audio transcription"""
+    transcription: str = Field(..., description="Full text transcription from audio")
+    transcription_successful: bool = Field(..., description="Whether transcription succeeded")
+
+
+class TextDataExtractionRequest(BaseModel):
+    """Request to extract structured data from text (after user edits)"""
+    text: str = Field(..., min_length=5, description="User-edited transcription text")
+
+
 class ProblemClassificationResponse(BaseModel):
     """Classifier response"""
     category_id: str = Field(..., description="Category ID")
