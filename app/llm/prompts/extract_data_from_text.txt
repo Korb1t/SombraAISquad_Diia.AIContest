@@ -6,7 +6,8 @@ Extract the following information:
 1. problem_text - detailed description of the utility problem (in Ukrainian)
 2. user_name - full name if mentioned
 3. user_address - full address if mentioned (street, house number, apartment)
-4. user_phone - contact phone number if mentioned
+4. user_city - city name if mentioned
+5. user_phone - contact phone number if mentioned
 
 IMPORTANT:
 - If some field is not mentioned, use null
@@ -17,6 +18,7 @@ Example output:
 {{
   "problem_text": "Не працює опалення в квартирі вже третій день",
   "user_name": "Іванченко Петро",
-  "user_address": "вулиця Хрещатик 10, квартира 5",
+  "user_address": "вулиця Любінська 10, квартира 5",
+  "user_city": "Львів",
   "user_phone": "+380501234567"
 }}
