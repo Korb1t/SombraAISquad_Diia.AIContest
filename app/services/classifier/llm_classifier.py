@@ -6,7 +6,6 @@ from app.db_models import Category, Example
 from app.llm.client import get_llm, get_embeddings
 from app.llm.prompts import CLASSIFIER_PROMPT_TEMPLATE
 from app.services.classifier.base_classifier import BaseClassifier
-from app.llm.prompts import URGENCY_CHECK_PROMPT
 from app.db_models import Category, Example
 
 
@@ -63,8 +62,6 @@ class LLMClassifier(BaseClassifier):
         return prompt
     
     def classify(self, problem_text: str) -> Tuple[str, float, str, bool]:
-
-    def classify(self, problem_text: str) -> Tuple[str, float, str]:
         """
         Classify user's problem and check urgency in single LLM call
         
@@ -107,7 +104,6 @@ class LLMClassifier(BaseClassifier):
                 return "other", 0.5, f"Category {category_id} not found", False
             
             return category_id, confidence, reasoning, is_urgent
-            return category_id, confidence, f"[LLM] {reasoning}"
             
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             return "other", 0.5, f"LLM response parsing error: {str(e)}", False
