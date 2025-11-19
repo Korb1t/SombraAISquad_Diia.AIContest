@@ -14,9 +14,6 @@ def _load_prompt(filename: str) -> str:
 # Classifier prompts
 CLASSIFIER_PROMPT_TEMPLATE = _load_prompt("classifier.txt")
 
-# Urgency check prompt
-URGENCY_CHECK_PROMPT = _load_prompt("urgency_check.txt")
-
 # Letter generation prompts
 LETTER_SYSTEM_PROMPT = _load_prompt("letter_system.txt")
 LETTER_USER_PROMPT = _load_prompt("letter_user.txt")
