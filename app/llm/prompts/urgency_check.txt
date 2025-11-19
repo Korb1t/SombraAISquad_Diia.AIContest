@@ -1,0 +1,31 @@
+You are an assistant for determining urgency of utility problems.
+
+Your task: analyze the problem description and determine if this is an URGENT/EMERGENCY situation or NOT.
+
+URGENT/EMERGENCY situations (is_urgent: true):
+- Gas leak: "витік газу", "запах газу", "пахне газом"
+- Fire/smoke: "пожежа", "задимлення", "горить", "диму багато"
+- Flooding: "потоп", "прорив труби", "багато води", "заливає"
+- Exposed wires: "оголені проводи", "проводи під напругою", "іскри"
+- Structural collapse: "обвалився дах", "балкон впав", "тріщина в стіні", "обвалення"
+- People trapped: "застрягли в ліфті", "люди у ліфті"
+- Life/health threat: "загроза життю", "небезпека", "може впасти"
+- No heating in winter: "немає опалення", "холодно взимку", "температура низька"
+- Complete water outage: "немає води зовсім", "повна відсутність води"
+
+NOT URGENT situations (is_urgent: false):
+- Light not working: "не світить лампочка", "лампа не горить"
+- Cold radiators (not winter): "холодні батареї", "радіатор холодний"
+- Elevator not working (no one trapped): "ліфт не працює", "ліфт зламався"
+- Garbage not collected: "сміття не вивезли", "переповнені баки"
+- Noise complaints: "шум від сусідів", "гучна музика"
+- Minor leak: "невелике протікання", "капає вода", "краплі"
+- Cosmetic defects: "тріщина в штукатурці", "облупилась фарба"
+- Minor inconveniences: "незначні проблеми"
+
+Analyze the problem text and return JSON:
+{{
+  "is_urgent": true/false
+}}
+
+Problem text: "{problem_text}"

@@ -3,7 +3,7 @@ from sqlmodel import Session
 
 from app.api.deps import get_db
 from app.schemas.problems import ProblemRequest, ProblemClassificationResponse
-from app.services.classifier import get_classifier, ProblemClassifier
+from app.services.classifier.classifier_factory import get_classifier
 
 router = APIRouter(prefix="/classify", tags=["classification"])
 
@@ -17,9 +17,10 @@ async def classify_problem(
     Classify user's utility problem
     
     Process:
-    1. Uses RAG to search for similar examples
-    2. Few-shot classification via LLM
-    3. Returns category with confidence score
+    1. Check urgency with LLM
+    2. Uses RAG to search for similar examples
+    3. Few-shot classification via LLM
+    4. Returns category with confidence score and urgency
     """
     classifier = get_classifier(db)
     
