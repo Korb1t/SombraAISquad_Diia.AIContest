@@ -13,10 +13,21 @@ IMPORTANT:
 1. Response must be in JSON format
 2. Choose the most appropriate category from available ones
 3. Estimate confidence from 0.0 to 1.0
+4. Determine if this is an URGENT/EMERGENCY situation requiring immediate action
+
+EMERGENCY situations include:
+- Gas leaks or gas smell
+- Water flooding or major pipe bursts
+- Electrical hazards (sparks, exposed wires, power outages in building)
+- Heating failure in winter
+- Sewage overflow
+- Structural damage threatening safety
+- Fire hazards
 
 Response format:
 {{
   "category_id": "category_id_here",
   "confidence": 0.95,
-  "reasoning": "brief explanation why this category"
+  "reasoning": "brief explanation why this category",
+  "is_urgent": true/false
 }}
