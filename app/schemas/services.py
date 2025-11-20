@@ -16,9 +16,11 @@ class IssueRequest(BaseModel):
 
 class ServiceResponse(ClassificationBase):
     """Response schema with responsible service contacts"""
-    service_type: str = Field(..., description="Type of service")
+    service_name: str = Field(..., description="Name of the service")
     phone_main: Optional[str] = Field(default=None, description="Main phone number")
     email_main: Optional[str] = Field(default=None, description="Main email address")
+    address_legal: Optional[str] = Field(default=None)
+    website: Optional[str] = Field(default=None)
     reasoning: str = Field(..., description="Explanation for service selection")
 
 
