@@ -1,43 +1,29 @@
-from pydantic import BaseModel, Field, field_validator
+"""
+Backwards compatibility module. All schemas have been refactored into separate files.
 
+For new code, import directly from:
+- base: ClassificationBase, TextValidator, UserInfo
+- problems_schemas: ProblemRequest, ProblemClassificationResponse, ProblemResponse
+- services: IssueRequest, ServiceInfo, ServiceResponse
+"""
 
-class ProblemRequest(BaseModel):
-    problem_text: str = Field(..., min_length=5, description="Problem description from user")
-    user_name: str | None = Field(default=None, description="Applicant name")
-    user_address: str | None = Field(default=None, description="Applicant address")
-    user_phone: str | None = Field(default=None, description="Applicant phone")
-    
-    @field_validator('problem_text')
-    @classmethod
-    def validate_problem_text(cls, v: str) -> str:
-        """Validate that problem text is not just whitespace"""
-        if not v or not v.strip():
-            raise ValueError("Problem text cannot be empty or whitespace only")
-        return v.strip()
+# TODO: Refactor existing imports in the codebase to use the new schema files directly.
+from .base import ClassificationBase, TextValidator, PersonalInfo
+from .problems_schemas import (
+    ProblemClassificationResponse,
+    ProblemRequest,
+    ProblemResponse,
+)
+from .services import IssueRequest, ServiceInfo, ServiceResponse
 
-
-class ProblemClassificationResponse(BaseModel):
-    """Classifier response"""
-    category_id: str = Field(..., description="Category ID")
-    category_name: str = Field(..., description="Category name")
-    category_description: str = Field(..., description="Category description")
-    confidence: float = Field(..., description="Classification confidence (0.0-1.0)")
-    reasoning: str = Field(..., description="Explanation why this category was chosen")
-    is_urgent: bool = Field(..., description="Is this an urgent/emergency problem?")
-
-
-class ServiceInfo(BaseModel):
-    service_name: str
-    service_phone: str | None = None
-    service_email: str | None = None
-    service_address: str | None = None
-
-
-class ProblemResponse(BaseModel):
-    """Full response with classification, service and letter"""
-    category_id: str
-    category_name: str
-    confidence: float
-    is_urgent: bool
-    service: ServiceInfo
-    letter_text: str
+__all__ = [
+    "ProblemRequest",
+    "ProblemClassificationResponse",
+    "ProblemResponse",
+    "ServiceInfo",
+    "IssueRequest",
+    "ServiceResponse",
+    "ClassificationBase",
+    "TextValidator",
+    "PersonalInfo",
+]

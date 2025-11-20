@@ -1,15 +1,30 @@
 from openai import OpenAI
+import google.generativeai as genai
 from app.core.config import settings
 
 
 def _create_openai_client() -> OpenAI:
     """
-    Create and configure OpenAI client
+    Create and configure OpenAI-compatible client for CodeMie
     """
     return OpenAI(
-        api_key=settings.OPENAI_API_KEY,
-        base_url=settings.OPENAI_API_BASE,
+        api_key=settings.CODEMIE_API_KEY,
+        base_url=settings.CODEMIE_API_BASE,
     )
+
+
+def _create_genai_client():
+    """
+    Configure and return genai client for CodeMie endpoint
+    """
+    genai.configure( 
+        api_key=settings.CODEMIE_API_KEY,
+        transport="rest",
+        client_options={
+            "api_endpoint": settings.CODEMIE_API_BASE
+        }
+    )
+    return genai
 
 
 class SimpleLLM:
@@ -17,7 +32,7 @@ class SimpleLLM:
     
     def __init__(self):
         self.client = _create_openai_client()
-        self.model = settings.MODEL_NAME
+        self.model = settings.CODEMIE_LLM_MODEL
     
     def invoke(self, prompt: str) -> str:
         """Invoke LLM with prompt"""
@@ -39,7 +54,7 @@ class SimpleEmbeddings:
     
     def __init__(self):
         self.client = _create_openai_client()
-        self.model = settings.EMBEDDING_MODEL
+        self.model = settings.CODEMIE_EMBEDDING_MODEL
     
     def embed_query(self, text: str) -> list[float]:
         """Generate embedding for text"""
@@ -57,3 +72,16 @@ def get_llm():
 def get_embeddings():
     """Get embeddings client"""
     return SimpleEmbeddings()
+
+
+class GeminiClient:
+    """Wrapper for Gemini API via CodeMie"""
+    
+    def __init__(self):
+        self.client = _create_genai_client()
+        self.model = self.client.GenerativeModel(settings.CODEMIE_TRANSCRIPTION_MODEL)
+
+
+def get_gemini_client() -> GeminiClient:
+    """Get Gemini client"""
+    return GeminiClient()

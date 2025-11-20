@@ -13,10 +13,23 @@ IMPORTANT:
 1. Response must be in JSON format
 2. Choose the most appropriate category from available ones
 3. Estimate confidence from 0.0 to 1.0
+4. Determine if this is an URGENT/EMERGENCY situation requiring immediate action
+
+EMERGENCY situations include:
+- Gas leak: "витік газу", "запах газу", "пахне газом"
+- Fire/smoke: "пожежа", "задимлення", "горить", "диму багато"
+- Flooding: "потоп", "прорив труби", "багато води", "заливає"
+- Exposed wires: "оголені проводи", "проводи під напругою", "іскри"
+- Structural collapse: "обвалився дах", "балкон впав", "тріщина в стіні", "обвалення"
+- People trapped: "застрягли в ліфті", "люди у ліфті"
+- Life/health threat: "загроза життю", "небезпека", "може впасти"
+- No heating in winter: "немає опалення", "холодно взимку", "температура низька"
+- Complete water outage: "немає води зовсім", "повна відсутність води"
 
 Response format:
 {{
   "category_id": "category_id_here",
   "confidence": 0.95,
-  "reasoning": "brief explanation why this category"
+  "reasoning": "brief explanation why this category",
+  "is_urgent": true/false
 }}
