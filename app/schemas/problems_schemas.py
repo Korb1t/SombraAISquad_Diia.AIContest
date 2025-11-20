@@ -1,13 +1,13 @@
 """Problem-related request and response schemas"""
 from pydantic import BaseModel, Field, field_validator
 
-from .base import ClassificationBase, TextValidator, UserInfo
+from app.schemas.base import ClassificationBase, TextValidator, PersonalInfo
 
 
 class ProblemRequest(BaseModel):
     """User's problem submission"""
     problem_text: str = Field(..., min_length=5, description="Problem description from user")
-    user_info: UserInfo = Field(..., description="Information about the user submitting the problem")
+    user_info: PersonalInfo = Field(..., description="Information about the user submitting the problem")
 
     @field_validator('problem_text')
     @classmethod
@@ -24,8 +24,6 @@ class ProblemClassificationResponse(ClassificationBase):
 
 class ProblemResponse(ClassificationBase):
     """Full response with classification, service and letter"""
-    service_name: str = Field(..., description="Name of the responsible service")
-    service_phone: str | None = Field(default=None, description="Service phone contact")
-    service_email: str | None = Field(default=None, description="Service email contact")
-    service_address: str | None = Field(default=None, description="Service address")
+    service_info: PersonalInfo = Field(..., description="Service contact information")
+    email: str | None = Field(default=None, description="Service email contact")
     letter_text: str = Field(..., description="Generated letter text")
