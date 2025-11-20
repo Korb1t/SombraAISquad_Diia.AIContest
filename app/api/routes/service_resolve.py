@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 from app.api.deps import get_db
-from app.schemas.problems import IssueRequest, ServiceResponse
+from app.schemas.services import IssueRequest, ServiceResponse
 from app.services.service_resolver import ServiceRouter
 
 router = APIRouter(prefix="/resolve_service", tags=["resolve service"])

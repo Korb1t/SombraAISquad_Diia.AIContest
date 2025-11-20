@@ -1,7 +1,7 @@
 from typing import Optional
 from sqlmodel import Session, select
 from app.db_models import Service, Building, ServiceAssignment
-from app.schemas.problems import ServiceResponse
+from app.schemas.services import ServiceResponse
 
 # Definition of categories we consider "district-level"
 RA_CATEGORIES = ["roads", "trees", "yard", "infrastructure"]
@@ -30,15 +30,21 @@ class ServiceRouter:
         )
         return self.session.exec(stmt).first()
 
-    def _format_response(self, service: Service, confidence: float, reasoning: str) -> ServiceResponse:
+    def _format_response(
+        self, service: Service, confidence: float, reasoning: str,
+        category_id: str = "", category_name: str = "", is_urgent: bool = False
+    ) -> ServiceResponse:
         """Formats the response for the API."""
         return ServiceResponse(
+            category_id=category_id,
+            category_name=category_name,
+            confidence=confidence,
+            is_urgent=is_urgent,
             service_name=service.name_ua,
-            service_type=service.type,
             phone_main=service.phone_main,
             email_main=service.email_main,
-            is_emergency=service.is_emergency,
-            confidence=confidence,
+            address_legal=service.address_legal,
+            website=service.website,
             reasoning=reasoning
         )
         
@@ -52,16 +58,22 @@ class ServiceRouter:
             return self._format_response(
                 hotline,
                 confidence=0.1,
-                reasoning="Проблема не була ідентифікована жодним спеціалізованим виконавцем. Звернення перенаправлено на Міську гарячу лінію 1580 для ручної диспетчеризації."
+                reasoning="Проблема не була ідентифікована жодним спеціалізованим виконавцем. Звернення перенаправлено на Міську гарячу лінію 1580 для ручної диспетчеризації.",
+                category_id="unknown",
+                category_name="Невідома категорія",
+                is_urgent=False
             )
         # Extreme case if even the hotline is not found
         return ServiceResponse(
-            service_name="Невідома служба",
-            service_type="Невідомий",
-            phone_main="1580",
-            email_main="",
-            is_emergency=False,
+            category_id="unknown",
+            category_name="Невідома категорія",
             confidence=0.0,
+            is_urgent=False,
+            service_name="Невідома служба",
+            phone_main="1580",
+            email_main=None,
+            address_legal=None,
+            website=None,
             reasoning="Критична помилка: Не вдалося знайти навіть аварійну/диспетчерську службу в базі даних."
         )
 
@@ -94,11 +106,14 @@ class ServiceRouter:
             emergency_result = self.session.exec(emergency_stmt).first()
             
             if emergency_result:
-                service, _ = emergency_result
+                service, assignment = emergency_result
                 return self._format_response(
                     service,
                     confidence=0.95,
-                    reasoning=f"Пріоритет: Знайдено аварійну службу {service.name_ua} для термінової проблеми '{category_id}'."
+                    reasoning=f"Пріоритет: Знайдено аварійну службу {service.name_ua} для термінової проблеми '{category_id}'.",
+                    category_id=category_id,
+                    category_name=assignment.category_id or "",
+                    is_urgent=True
                 )
 
             # If no specific emergency service, return the general hotline as an urgent fallback
@@ -119,11 +134,14 @@ class ServiceRouter:
             specific_result = self.session.exec(specific_stmt).first()
 
             if specific_result:
-                service, _ = specific_result
+                service, assignment = specific_result
                 return self._format_response(
                     service,
                     confidence=0.9,
-                    reasoning=f"Адресна прив'язка: Будинок {house_number} на вул. {street_name} обслуговується {service.name_ua}."
+                    reasoning=f"Адресна прив'язка: Будинок {house_number} на вул. {street_name} обслуговується {service.name_ua}.",
+                    category_id=category_id,
+                    category_name=assignment.category_id or "",
+                    is_urgent=is_urgent
                 )
             
             # Fallback at street/district level (LKP covering the street if no OSBB)
@@ -145,11 +163,14 @@ class ServiceRouter:
             ra_result = self.session.exec(ra_stmt).first()
             
             if ra_result:
-                service, _ = ra_result
+                service, assignment = ra_result
                 return self._format_response(
                     service,
                     confidence=0.85,
-                    reasoning=f"Районний рівень: Проблема '{category_id}' на вулиці {street_name} належить до юрисдикції {service.name_ua}."
+                    reasoning=f"Районний рівень: Проблема '{category_id}' на вулиці {street_name} належить до юрисдикції {service.name_ua}.",
+                    category_id=category_id,
+                    category_name=assignment.category_id or "",
+                    is_urgent=is_urgent
                 )
 
         # --- 4. МІСЬКІ МОНОПОЛІСТИ (Citywide Monopolists) ---
@@ -165,11 +186,14 @@ class ServiceRouter:
             citywide_result = self.session.exec(citywide_stmt).first()
             
             if citywide_result:
-                service, _ = citywide_result
+                service, assignment = citywide_result
                 return self._format_response(
                     service,
                     confidence=0.7,
-                    reasoning=f"Міський монополіст: Проблема '{category_id}' є загальноміською та обслуговується {service.name_ua}."
+                    reasoning=f"Міський монополіст: Проблема '{category_id}' є загальноміською та обслуговується {service.name_ua}.",
+                    category_id=category_id,
+                    category_name=assignment.category_id or "",
+                    is_urgent=is_urgent
                 )
 
         # --- 5. HOTLINE FALLBACK ---
