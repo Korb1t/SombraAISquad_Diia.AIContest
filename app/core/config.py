@@ -65,7 +65,9 @@ class Settings(BaseSettings):
     # Used by 'hybrid' mode to decide when to fallback to LLM.
     CLASSIFIER_THRESHOLD: float = 0.4
 
-    TOP_K: int = 7
+    # TOP_K: Number of nearest neighbors for k-NN voting
+    # Optimized with balanced test set (10 samples per category):
+    TOP_K: int = 3
 
     @computed_field  # type: ignore[prop-decorator]
     @property

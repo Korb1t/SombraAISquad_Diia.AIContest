@@ -1,9 +1,10 @@
 import argparse
+import sys
 from dotenv import load_dotenv
 from sqlmodel import Session, create_engine
 
 # Ensure app is in python path for imports to work if running from root
-#sys.path.insert(0, ".")
+sys.path.insert(0, ".")
 
 from app.core.config import settings
 from app.scripts.initial_data.db_setup import init_pgvector_extension, create_tables

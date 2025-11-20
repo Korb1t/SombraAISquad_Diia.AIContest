@@ -1,11 +1,7 @@
 from typing import Optional, List
 from sqlalchemy import UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Column, Field, SQLModel, Relationship
 
-# We need to import Category for type hints if using Relationships across files,
-# but usually, string forward references are safer to avoid circular imports.
-# from .classification import Category 
 
 class Service(SQLModel, table=True):
     """Utility service provider (КП, ЖЕК, ОСББ, etc.)."""
@@ -21,40 +17,72 @@ class Service(SQLModel, table=True):
     website: Optional[str] = Field(default=None)
     is_emergency: bool = Field(default=False)
 
-    # Relationship to areas
-    areas: List["ServiceArea"] = Relationship(back_populates="service")
+    # Relationship to assignments
+    assignments: List["ServiceAssignment"] = Relationship(back_populates="service")
 
 
-class ServiceArea(SQLModel, table=True):
-    """Responsibility area for a given service and category."""
-    __tablename__ = "service_areas"
+class Building(SQLModel, table=True):
+    """Unique geographic object (house number on a street)."""
+    __tablename__ = "buildings"
+    __table_args__ = (
+        UniqueConstraint("city", "street_name", "house_number", name="uq_building_address"),
+    )
+
+    building_id: Optional[int] = Field(default=None, primary_key=True)
+    
+    city: str = Field(default="Львів", index=True)
+    district: Optional[str] = Field(
+        default=None, index=True, description="Administrative district name"
+    )
+    street_name: str = Field(index=True, description="Street name")
+    house_number: str = Field(description="House number (e.g., '12', '12А')")
+
+    assignments: List["ServiceAssignment"] = Relationship(back_populates="building")
+
+
+class ServiceAssignment(SQLModel, table=True):
+    """Link between a Service, a Problem Category, and a specific Building/Area."""
+    __tablename__ = "service_assignments"
     __table_args__ = (
         UniqueConstraint(
-            "street_name",
-            "service_id",
+            "building_id",
             "category_id",
-            name="uq_service_areas_street_service_category",
+            "service_id",
+            name="uq_assignment_building_category_service",
         ),
     )
 
-    area_id: Optional[int] = Field(default=None, primary_key=True)
+    assignment_id: Optional[int] = Field(default=None, primary_key=True)
 
-    service_id: int = Field(foreign_key="services.service_id", index=True)
-    category_id: str = Field(foreign_key="categories.id", index=True)
-
-    city: str = Field(default="Львів")
-    district: Optional[str] = Field(default=None)
-    street_name: Optional[str] = Field(default=None)
-
-    # JSONB for house numbers
-    house_numbers: Optional[list[str]] = Field(
-        default=None,
-        sa_column=Column(JSONB),
-        description="List/range of house numbers covered"
+    service_id: int = Field(
+        foreign_key="services.service_id",
+        index=True,
+        description="Service responsible for this assignment",
+    )
+    category_id: str = Field(
+        foreign_key="categories.id",
+        index=True,
+        description="Problem category ID handled",
     )
 
-    coverage_level: str = Field(default="building")
-    is_primary: bool = Field(default=True)
+    building_id: Optional[int] = Field(
+        default=None,
+        foreign_key="buildings.building_id",
+        index=True,
+        description="Specific building ID covered (NULL for wider coverage)",
+    )
 
-    service: Service = Relationship(back_populates="areas")
-    # Note: You can add a relationship to Category here too if needed
+    # Coverage granularity: building | street | district | citywide
+    coverage_level: str = Field(
+        default="building",
+        description="Coverage granularity",
+    )
+    
+    is_primary: bool = Field(
+        default=True,
+        description="Marks primary/priority service for this combination",
+    )
+
+    # Relationships
+    service: Service = Relationship(back_populates="assignments")
+    building: Optional[Building] = Relationship(back_populates="assignments")
