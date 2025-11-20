@@ -16,11 +16,21 @@ REQUIREMENTS:
 4. Do NOT add date, legal references or extra details
 5. Return ONLY the letter text without any comments
 
+EXAMPLE:
+Input: "в під'їзді лампочка не горить вже тиждень"
+Street: "вулиця Володимира Великого"
+Building: "106"
+
+Output:
+Доброго дня!
+Прошу звернути увагу, що в під'їзді, по вулиці Володимира Великого 106, вже протягом тижня не працює (не горить) лампочка.
+Просимо організувати ремонт або заміну для відновлення освітлення.
+Дякую!
+
 TEMPLATE STRUCTURE:
 Доброго дня!
 
-[Reformulate problem_text into formal style and incorporate it naturally into the appeal]
-Адреса: {street}, буд. {building}
+[Reformulate problem_text into formal style and naturally incorporate the address (street, building) into the problem description. Do NOT add address as a separate field.]
 
 Просимо організувати ремонт або заміну для вирішення проблеми.
 
