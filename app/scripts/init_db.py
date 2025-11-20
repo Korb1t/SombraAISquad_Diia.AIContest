@@ -40,9 +40,9 @@ def load_categories_and_examples(session: Session, categories_file: str = "app/d
         data = json.load(f)
     
     print("Checking API key...")
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("CODEMIE_API_KEY")
     if not api_key:
-        raise ValueError("OPENAI_API_KEY not found in .env file!")
+        raise ValueError("CODEMIE_API_KEY not found in .env file!")
     print(f"API key: {api_key[:10]}...")
     
     embeddings = get_embeddings()

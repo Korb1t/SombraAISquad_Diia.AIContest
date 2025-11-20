@@ -12,8 +12,8 @@ class BaseClassifier(ABC):
         self.session = session
 
     @abstractmethod
-    def classify(self, problem_text: str) -> Tuple[str, float, str]:
-        """Must return (category_id, confidence, reasoning)"""
+    def classify(self, problem_text: str) -> Tuple[str, float, str, bool]:
+        """Must return (category_id, confidence, reasoning, is_urgent)"""
         pass
 
     def get_category_info(self, category_id: str) -> Category | None:

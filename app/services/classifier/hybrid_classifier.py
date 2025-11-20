@@ -22,7 +22,7 @@ class HybridClassifier(BaseClassifier):
         self.knn_strategy = KNNClassifier(session)
         self.llm_strategy = LLMClassifier(session)
 
-    def classify(self, problem_text: str) -> Tuple[str, float, str]:
+    def classify(self, problem_text: str) -> Tuple[str, float, str, bool]:
         """
         Orchestrates the classification flow.
         """

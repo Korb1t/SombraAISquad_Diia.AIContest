@@ -19,6 +19,15 @@ async def transcribe_voice(
     if audio.content_type not in allowed_types:
         raise HTTPException(400, f"Unsupported format: {audio.content_type}")
     
+    # Check file size (max 10MB)
+    max_size = 10 * 1024 * 1024  # 10MB in bytes
+    audio.file.seek(0, 2)  # Seek to end of file
+    file_size = audio.file.tell()
+    audio.file.seek(0)  # Reset to beginning
+    
+    if file_size > max_size:
+        raise HTTPException(400, f"File too large. Maximum size is 10MB, got {file_size / (1024*1024):.2f}MB")
+    
     try:
         voice_service = get_voice_service()
         transcription = voice_service.transcribe_audio(audio.file, audio.content_type or "audio/webm")
