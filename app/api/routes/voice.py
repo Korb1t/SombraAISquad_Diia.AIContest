@@ -1,10 +1,6 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File
 
-from app.schemas.voice import (
-    VoiceTranscriptionResponse,
-    TextDataExtractionRequest,
-    ExtractedProblemData
-)
+from app.schemas.voice import VoiceTranscriptionResponse
 from app.services.voice import get_voice_service
 
 router = APIRouter(prefix="/voice", tags=["voice"])
@@ -25,13 +21,3 @@ async def transcribe_voice(
         return VoiceTranscriptionResponse(transcription=transcription, transcription_successful=True)
     except Exception as e:
         raise HTTPException(500, f"Transcription failed: {str(e)}")
-
-
-@router.post("/extract", response_model=ExtractedProblemData)
-async def extract_data_from_text(request: TextDataExtractionRequest) -> ExtractedProblemData:
-    """Extract structured data (problem, name, address, city, phone) from user-edited text"""
-    try:
-        voice_service = get_voice_service()
-        return voice_service.extract_data_from_text(request.text)
-    except Exception as e:
-        raise HTTPException(500, f"Extraction failed: {str(e)}")
