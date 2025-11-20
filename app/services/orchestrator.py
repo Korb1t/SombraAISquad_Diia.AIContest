@@ -6,8 +6,9 @@ Orchestrator service that coordinates the flow:
 4. Return complete solution
 """
 from sqlmodel import Session
-from app.schemas.orchestration import OrchestrationRequest, OrchestrationResponse, ClassificationDetails, ServiceDetails
+from app.schemas.orchestration import OrchestrationRequest, OrchestrationResponse
 from app.schemas.base import PersonalInfo
+from app.schemas.problems_schemas import ProblemClassificationResponse
 from app.schemas.appeal import AppealRequest
 from app.services.classifier.classifier_factory import get_classifier
 from app.services.service_resolver import ServiceRouter
@@ -45,20 +46,10 @@ class OrchestrationService:
         
         # Step 1: Classify the problem
         classification_result = self.classifier.classify_with_category(request.problem_text)
-        
-        # Parse classification result into structured data
-        classification = ClassificationDetails(
-            category_id=classification_result["category_id"],
-            category_name=classification_result["category_name"],
-            confidence=classification_result["confidence"],
-            is_urgent=classification_result["is_urgent"],
-            category_description=classification_result.get("category_description", ""),
-            reasoning=classification_result.get("reasoning", "")
-        )
+        classification = ProblemClassificationResponse(**classification_result)
         
         # Parse address - extract street name and building number
-        # Expected format: "street_name, building_number" or just "street_name"
-        street_info = self._parse_address(request.address)
+        street_info = self._parse_address(request.user_info.address)
         street_name = street_info["street"]
         building_number = street_info["building"]
         
@@ -68,14 +59,6 @@ class OrchestrationService:
             is_urgent=classification.is_urgent,
             street_name=street_name,
             house_number=building_number
-        )
-        
-        service = ServiceDetails(
-            service_name=service_response.service_name,
-            phone_main=service_response.phone_main,
-            email_main=service_response.email_main,
-            address_legal=service_response.address_legal,
-            website=service_response.website
         )
         
         # Step 3: Generate appeal text
@@ -88,17 +71,16 @@ class OrchestrationService:
         
         # Step 4: Construct and return orchestrated response
         user_info = PersonalInfo(
-            name=request.name,
-            address=request.address,
-            phone=request.phone
+            name=request.user_info.name,
+            address=request.user_info.address,
+            phone=request.user_info.phone
         )
         
         return OrchestrationResponse(
             user_info=user_info,
             classification=classification,
-            service=service,
-            appeal_text=appeal_text,
-            service_reasoning=service_response.reasoning
+            service=service_response,
+            appeal_text=appeal_text
         )
     
     @staticmethod
