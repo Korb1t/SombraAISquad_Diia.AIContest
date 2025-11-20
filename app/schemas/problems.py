@@ -5,6 +5,7 @@ class ProblemRequest(BaseModel):
     problem_text: str = Field(..., min_length=5, description="Problem description from user")
     user_name: str | None = Field(default=None, description="Applicant name")
     user_address: str | None = Field(default=None, description="Applicant address")
+    user_city: str | None = Field(default=None, description="Applicant city")
     user_phone: str | None = Field(default=None, description="Applicant phone")
     
     @field_validator('problem_text')

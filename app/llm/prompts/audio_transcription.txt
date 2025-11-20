@@ -1,0 +1,7 @@
+Transcribe this Ukrainian audio recording about a utility problem.
+
+The user is describing a utility problem and may provide their name, address, and phone number.
+
+Return the FULL transcription in Ukrainian exactly as spoken. Keep all details, names, addresses, phone numbers.
+
+Return ONLY the transcription text, no formatting, no extra commentary.
