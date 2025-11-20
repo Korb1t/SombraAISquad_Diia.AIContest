@@ -8,7 +8,7 @@ For new code, import directly from:
 """
 
 # TODO: Refactor existing imports in the codebase to use the new schema files directly.
-from .base import ClassificationBase, TextValidator, UserInfo
+from .base import ClassificationBase, TextValidator, PersonalInfo
 from .problems_schemas import (
     ProblemClassificationResponse,
     ProblemRequest,
@@ -25,5 +25,5 @@ __all__ = [
     "ServiceResponse",
     "ClassificationBase",
     "TextValidator",
-    "UserInfo",
+    "PersonalInfo",
 ]

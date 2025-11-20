@@ -1,8 +1,8 @@
 """Base schemas with common fields and validators"""
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 
-class UserInfo(BaseModel):
+class PersonalInfo(BaseModel):
     """Common user information fields"""
     name: str | None = Field(default=None, description="Applicant name")
     address: str | None = Field(default=None, description="Applicant address")

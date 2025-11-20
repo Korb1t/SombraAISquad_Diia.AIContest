@@ -1,6 +1,6 @@
 """Export all schemas for easy importing"""
-from .base import ClassificationBase, TextValidator, UserInfo
-from .problems_schemas import (
+from app.schemas.base import ClassificationBase, TextValidator, PersonalInfo
+from app.schemas.problems_schemas import (
     ProblemClassificationResponse,
     ProblemRequest,
     ProblemResponse,
@@ -11,7 +11,7 @@ __all__ = [
     # Base
     "ClassificationBase",
     "TextValidator",
-    "UserInfo",
+    "PersonalInfo",
     # Problems
     "ProblemRequest",
     "ProblemClassificationResponse",
