@@ -19,13 +19,26 @@ services:
     depends_on:
       - pgvector
     environment:
+      - FRONTEND_HOST=${FRONTEND_HOST:-http://localhost:5173}
+      - ENVIRONMENT=${ENVIRONMENT:-local}
+      - PROJECT_NAME=${PROJECT_NAME:-AI Navigator for Municipal Services}
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
+      - SECRET_KEY=${SECRET_KEY?Variable not set}
       - POSTGRES_SERVER=pgvector
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_DB=${POSTGRES_DB?Variable not set}
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - CODEMIE_API_KEY=${CODEMIE_API_KEY?Variable not set}
+      - CODEMIE_API_BASE=${CODEMIE_API_BASE:-https://codemie.lab.epam.com/llms}
+      - CODEMIE_LLM_MODEL=${CODEMIE_LLM_MODEL:-gpt-5-mini-2025-08-07}
+      - CODEMIE_EMBEDDING_MODEL=${CODEMIE_EMBEDDING_MODEL:-codemie-text-embedding-ada-002}
+      - CODEMIE_TRANSCRIPTION_MODEL=${CODEMIE_TRANSCRIPTION_MODEL:-gemini-2.5-flash}
+      - CLASSIFIER_TYPE=${CLASSIFIER_TYPE:-knn}
+      - CLASSIFIER_THRESHOLD=${CLASSIFIER_THRESHOLD:-0.4}
+      - TOP_K=${TOP_K:-7}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
       interval: 10s
       timeout: 5s
       retries: 5
