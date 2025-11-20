@@ -3,6 +3,7 @@ from sqlmodel import Session, select
 from app.db_models import Service, Building, ServiceAssignment
 from app.schemas.services import ServiceResponse
 
+# TODO: Move category definitions out
 # Definition of categories we consider "district-level"
 RA_CATEGORIES = ["roads", "trees", "yard", "infrastructure"]
 
@@ -12,6 +13,7 @@ CITYWIDE_MONOPOLISTS_CATEGORIES = ["water_supply", "heating", "gas", "lighting"]
 # Names of district administrations for validation, since they are tied to citywide
 RA_SERVICE_TYPES = ["РА"]
 
+# TODO: extract hardcoded strings
 class ServiceRouter:
     """
     Router that determines the responsible service
@@ -48,27 +50,32 @@ class ServiceRouter:
             reasoning=reasoning
         )
         
-    def _get_hotline_fallback(self) -> ServiceResponse:
+    def _get_hotline_fallback(self, category_id: str, category_name: str, is_urgent: bool) -> ServiceResponse:
         """Returns the City Hotline 1580 as a fallback."""
         hotline = self.session.exec(
             select(Service).where(Service.name_ua == "Міська гаряча лінія 1580")
         ).first()
         
         if hotline:
+            if is_urgent:
+                reasoning = "Не було знайдено спеціальну аварійну службу для цієї проблеми. Звернення перенаправлено на Міську гарячу лінію 1580 для ручної диспетчеризації."
+            else:
+                reasoning = "Проблема не була ідентифікована жодним спеціалізованим виконавцем. Звернення перенаправлено на Міську гарячу лінію 1580 для ручної диспетчеризації."
+        
             return self._format_response(
                 hotline,
                 confidence=0.1,
-                reasoning="Проблема не була ідентифікована жодним спеціалізованим виконавцем. Звернення перенаправлено на Міську гарячу лінію 1580 для ручної диспетчеризації.",
-                category_id="unknown",
-                category_name="Невідома категорія",
-                is_urgent=False
+                reasoning=reasoning,
+                category_id=category_id,
+                category_name=category_name,
+                is_urgent=is_urgent
             )
         # Extreme case if even the hotline is not found
         return ServiceResponse(
-            category_id="unknown",
-            category_name="Невідома категорія",
+            category_id=category_id,
+            category_name=category_name,
             confidence=0.0,
-            is_urgent=False,
+            is_urgent=is_urgent,
             service_name="Невідома служба",
             phone_main="1580",
             email_main=None,
@@ -117,7 +124,7 @@ class ServiceRouter:
                 )
 
             # If no specific emergency service, return the general hotline as an urgent fallback
-            return self._get_hotline_fallback()
+            return self._get_hotline_fallback(category_id=category_id, category_name="", is_urgent=True)
 
         # --- 2. BUILDING-LEVEL RESPONSIBILITY (OSBB/LKP) ---
         if category_id not in RA_CATEGORIES and building_id is not None:
@@ -173,7 +180,7 @@ class ServiceRouter:
                     is_urgent=is_urgent
                 )
 
-        # --- 4. МІСЬКІ МОНОПОЛІСТИ (Citywide Monopolists) ---
+        # --- 4. Citywide Monopolists ---
         if category_id in CITYWIDE_MONOPOLISTS_CATEGORIES:
             
             citywide_stmt = (
@@ -197,4 +204,4 @@ class ServiceRouter:
                 )
 
         # --- 5. HOTLINE FALLBACK ---
-        return self._get_hotline_fallback()
+        return self._get_hotline_fallback(category_id=category_id, category_name="", is_urgent=is_urgent)
