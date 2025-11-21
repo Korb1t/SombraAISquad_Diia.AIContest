@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import { ArrowLeft, Plus, Minus, Search, Target } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Search, Target, ArrowRight } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import tridentImage from '@/assets/trident.png';
 
 // Створюємо кастомну іконку для маркера (червона шпилька)
 const customIcon = new L.Icon({
@@ -22,33 +23,90 @@ const customIcon = new L.Icon({
 
 interface MapPageProps {
   onBack: () => void;
-  onSelectLocation: (lat: number, lng: number) => void;
+  onSelectLocation: (payload: { lat: number; lng: number; addressLabel: string }) => void;
+}
+
+const mockAddresses = [
+  {
+    id: 1,
+    label: 'Львівська область, м. Львів, Володимира Великого 10',
+    coords: [49.8105, 23.981],
+  },
+  {
+    id: 2,
+    label: 'Львівська область, м. Львів, Володимира Великого 12',
+    coords: [49.811, 23.9822],
+  },
+  {
+    id: 3,
+    label: 'Львівська область, м. Львів, Володимира Великого 14',
+    coords: [49.8115, 23.9833],
+  },
+  {
+    id: 4,
+    label: 'Львівська область, м. Львів, Володимира Великого 16',
+    coords: [49.812, 23.9844],
+  },
+] as const;
+
+// Функція для отримання адреси з координат (для демо - mock)
+async function getAddressFromCoords(lat: number, lng: number): Promise<string> {
+  try {
+    // Реальний API запит до Nominatim (OpenStreetMap)
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=uk`
+    );
+    const data = await response.json();
+    
+    // Форматуємо адресу
+    const addr = data.address;
+    const parts = [];
+    
+    if (addr.state) parts.push(addr.state);
+    if (addr.city) parts.push(`м. ${addr.city}`);
+    else if (addr.town) parts.push(`м. ${addr.town}`);
+    if (addr.road) {
+      const street = addr.house_number ? `${addr.road} ${addr.house_number}` : addr.road;
+      parts.push(street);
+    }
+    
+    return parts.join(', ') || `Координати: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  } catch (error) {
+    console.error('Помилка отримання адреси:', error);
+    return `Координати: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  }
 }
 
 // Компонент для переміщення маркера при кліку
-function DraggableMarker({ 
-  position, 
-  setPosition 
-}: { 
-  position: [number, number]; 
+function DraggableMarker({
+  position,
+  setPosition,
+  onPositionChange,
+}: {
+  position: [number, number];
   setPosition: (pos: [number, number]) => void;
+  onPositionChange?: (pos: [number, number]) => void;
 }) {
   useMapEvents({
     click(e) {
-      setPosition([e.latlng.lat, e.latlng.lng]);
+      const newPos: [number, number] = [e.latlng.lat, e.latlng.lng];
+      setPosition(newPos);
+      onPositionChange?.(newPos);
     },
   });
 
   return (
-    <Marker 
-      position={position} 
+    <Marker
+      position={position}
       icon={customIcon}
-      draggable={true}
+      draggable
       eventHandlers={{
         dragend: (e) => {
           const marker = e.target;
           const position = marker.getLatLng();
-          setPosition([position.lat, position.lng]);
+          const newPos: [number, number] = [position.lat, position.lng];
+          setPosition(newPos);
+          onPositionChange?.(newPos);
         },
       }}
     />
@@ -58,7 +116,18 @@ function DraggableMarker({
 export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
   // Київ - дефолтна позиція
   const [markerPosition, setMarkerPosition] = useState<[number, number]>([50.4501, 30.5234]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSearchPanel, setShowSearchPanel] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAddressLabel, setSelectedAddressLabel] = useState('');
   const mapRef = useRef<L.Map | null>(null);
+
+  const filteredAddresses = useMemo(() => {
+    if (!searchQuery) return mockAddresses;
+    return mockAddresses.filter((addr) =>
+      addr.label.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
 
   const handleZoomIn = () => {
     if (mapRef.current) {
@@ -92,17 +161,39 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
     }
   };
 
-  const handleSelect = () => {
-    onSelectLocation(markerPosition[0], markerPosition[1]);
+  const handleSelect = async () => {
+    setIsLoading(true);
+    
+    // Отримуємо адресу якщо не вибрана зі списку
+    let label = selectedAddressLabel;
+    if (!label) {
+      label = await getAddressFromCoords(markerPosition[0], markerPosition[1]);
+    }
+    
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setIsLoading(false);
+    
+    onSelectLocation({
+      lat: markerPosition[0],
+      lng: markerPosition[1],
+      addressLabel: label,
+    });
+  };
+
+  const handleAddressSelect = (address: typeof mockAddresses[number]) => {
+    setMarkerPosition([address.coords[0], address.coords[1]]);
+    setSelectedAddressLabel(address.label);
+    mapRef.current?.flyTo([address.coords[0], address.coords[1]], 17);
+    setShowSearchPanel(false);
   };
 
   return (
-    <div className="h-full flex flex-col relative">
+    <div className="h-full flex flex-col relative bg-[#e5eef8]">
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-[1000] bg-white/95 backdrop-blur-sm shadow-sm">
+      <div className="absolute top-0 left-0 right-0 z-[1000] bg-[#dfe8f4]">
         <div className="pt-14 pb-4 px-6">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={onBack}
               className="w-10 h-10 flex items-center justify-center -ml-2"
             >
@@ -115,6 +206,15 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
         </div>
       </div>
 
+      {/* Loader поверх карти (але під header) */}
+      {isLoading && (
+        <div className="absolute inset-0 top-[60px] z-[1100] bg-gray-100 flex items-center justify-center">
+          <div className="animate-pulse">
+            <img src={tridentImage} alt="Trident" className="w-16 h-16" />
+          </div>
+        </div>
+      )}
+
       {/* Карта */}
       <div className="flex-1 relative">
         <MapContainer
@@ -123,48 +223,62 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
           style={{ height: '100%', width: '100%' }}
           ref={mapRef}
           zoomControl={false}
+          whenCreated={(mapInstance) => {
+            mapRef.current = mapInstance;
+          }}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <DraggableMarker position={markerPosition} setPosition={setMarkerPosition} />
+          <DraggableMarker
+            position={markerPosition}
+            setPosition={setMarkerPosition}
+            onPositionChange={(pos) =>
+              setSelectedAddressLabel(
+                `Координати: ${pos[0].toFixed(4)}, ${pos[1].toFixed(4)}`
+              )
+            }
+          />
         </MapContainer>
 
         {/* Кнопки управління справа */}
-        <div className="absolute top-24 right-4 z-[1000] flex flex-col gap-3">
+        <div className="absolute top-28 right-3 z-[1000] flex flex-col gap-2.5">
           {/* Zoom In */}
           <button
             onClick={handleZoomIn}
-            className="w-12 h-12 bg-black rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
+            className="w-11 h-11 bg-black rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
           >
-            <Plus className="w-6 h-6 text-white" strokeWidth={2.5} />
+            <Plus className="w-5 h-5 text-white" strokeWidth={2.5} />
           </button>
 
           {/* Zoom Out */}
           <button
             onClick={handleZoomOut}
-            className="w-12 h-12 bg-black rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
+            className="w-11 h-11 bg-black rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
           >
-            <Minus className="w-6 h-6 text-white" strokeWidth={2.5} />
+            <Minus className="w-5 h-5 text-white" strokeWidth={2.5} />
           </button>
 
-          {/* Search (поки неактивна) */}
+          {/* Search */}
           <button
-            disabled
-            className="w-12 h-12 bg-black rounded-full flex items-center justify-center shadow-lg opacity-50"
+            onClick={() => {
+              setShowSearchPanel(true);
+              setSearchQuery('');
+            }}
+            className="w-11 h-11 bg-black rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
           >
-            <Search className="w-6 h-6 text-white" strokeWidth={2.5} />
+            <Search className="w-5 h-5 text-white" strokeWidth={2.5} />
           </button>
         </div>
 
         {/* Кнопка "Моя локація" внизу справа */}
-        <div className="absolute bottom-24 right-4 z-[1000]">
+        <div className="absolute bottom-24 right-3 z-[1000]">
           <button
             onClick={handleMyLocation}
-            className="w-14 h-14 bg-black rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
+            className="w-12 h-12 bg-black rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
           >
-            <Target className="w-7 h-7 text-white" strokeWidth={2.5} />
+            <Target className="w-6 h-6 text-white" strokeWidth={2.5} />
           </button>
         </div>
 
@@ -178,9 +292,65 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
           </button>
         </div>
       </div>
+
+      {/* Пошуковий оверлей */}
+      {showSearchPanel && (
+        <div className="absolute inset-0 z-[1300] bg-[#e5eef8] flex flex-col">
+          <div className="pt-14 pb-4 px-6 flex items-center gap-4">
+            <button
+              onClick={() => setShowSearchPanel(false)}
+              className="w-10 h-10 flex items-center justify-center -ml-2"
+            >
+              <ArrowLeft className="w-6 h-6 text-gray-900" strokeWidth={2} />
+            </button>
+            <h1 className="text-xl font-semibold text-gray-900">Шукати</h1>
+          </div>
+
+          <div className="px-6">
+            <div className="bg-white rounded-2xl flex items-center gap-3 px-4 py-3 shadow-sm">
+              <Search className="w-5 h-5 text-gray-400" strokeWidth={2} />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Володимир"
+                className="flex-1 bg-transparent outline-none text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="px-6 mt-4 flex-1 overflow-y-auto">
+            <div className="bg-white rounded-3xl shadow-sm p-2 space-y-2">
+              {filteredAddresses.map((address) => (
+                <button
+                  key={address.id}
+                  onClick={() => handleAddressSelect(address)}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-2xl hover:bg-gray-100 transition-colors text-left"
+                >
+                  <span className="text-sm text-gray-800">{address.label}</span>
+                  <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center">
+                    <ArrowRight className="w-4 h-4 text-white" strokeWidth={2.5} />
+                  </div>
+                </button>
+              ))}
+              {!filteredAddresses.length && (
+                <p className="text-center text-gray-400 text-sm py-6">Нічого не знайдено</p>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 bg-gray-200 rounded-t-[32px] px-10 py-6 text-center text-gray-400 text-sm">
+            <div className="h-36 bg-gray-300 rounded-2xl flex items-center justify-center">
+              iOS keyboard mock
+            </div>
+            <button
+              onClick={() => setShowSearchPanel(false)}
+              className="mt-3 text-sm text-gray-500 underline"
+            >
+              Приховати
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-
-

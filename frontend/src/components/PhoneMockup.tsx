@@ -44,12 +44,17 @@ export function PhoneMockup({ children, className }: PhoneMockupProps) {
         <div className="absolute -right-1 top-36 w-1 h-16 bg-gray-800 rounded-r" />
         
         {/* Dynamic Island */}
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-full z-20 shadow-lg" />
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-full z-[10000] shadow-lg pointer-events-none" />
         
         {/* Екран айфону */}
         <div className="relative w-full h-full bg-white rounded-[3rem] overflow-hidden shadow-inner">
-          {/* Status bar (час, батарея, сигнал) */}
-          <div className="absolute top-0 left-0 right-0 h-14 z-10 px-8 pt-2.5">
+          {/* Контент додатку */}
+          <div className="absolute inset-0 overflow-y-auto">
+            {children}
+          </div>
+
+          {/* Status bar (час, батарея, сигнал) - ПОВЕРХ контенту */}
+          <div className="absolute top-0 left-0 right-0 h-14 z-[9999] px-8 pt-2.5 pointer-events-none">
             <div className="flex items-center justify-between text-[15px] font-semibold">
               <span className="text-gray-900">{time || '00:00'}</span>
               <div className="w-24" /> {/* Пропуск для Dynamic Island */}
@@ -62,11 +67,6 @@ export function PhoneMockup({ children, className }: PhoneMockupProps) {
                 <Battery className="w-5 h-4" strokeWidth={2.5} />
               </div>
             </div>
-          </div>
-
-          {/* Контент додатку */}
-          <div className="absolute inset-0 overflow-y-auto">
-            {children}
           </div>
         </div>
       </div>

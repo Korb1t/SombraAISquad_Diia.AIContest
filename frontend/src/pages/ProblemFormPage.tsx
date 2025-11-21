@@ -4,11 +4,17 @@ import { Loader } from '@/components/Loader';
 
 interface ProblemFormPageProps {
   onBack: () => void;
-  address?: string;
+  mode?: 'home' | 'other';
+  presetAddress?: string;
   onSubmit: (problemText: string) => void;
 }
 
-export function ProblemFormPage({ onBack, address, onSubmit }: ProblemFormPageProps) {
+export function ProblemFormPage({
+  onBack,
+  onSubmit,
+  mode = 'home',
+  presetAddress,
+}: ProblemFormPageProps) {
   const [problemText, setProblemText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
@@ -16,9 +22,14 @@ export function ProblemFormPage({ onBack, address, onSubmit }: ProblemFormPagePr
   const recognitionRef = useRef<any>(null);
   const finalTranscriptRef = useRef('');
   
-  // Хардкоджена адреса з банку Diia для демо
-  const defaultAddress = 'Україна, область Львівська, місто Львів, вулиця Володимира Великого 106, кв 54';
-  const displayAddress = address || defaultAddress;
+  // Адреси
+  const defaultAddress =
+    'Україна, область Львівська, місто Львів, вулиця Володимира Великого 106, кв 54';
+  const isHomeMode = mode === 'home';
+  const headerTitle = isHomeMode ? 'За місцем проживання' : 'Інша Адреса';
+  const displayAddress = isHomeMode
+    ? defaultAddress
+    : presetAddress || 'Обрана адреса';
 
   // Ініціалізація Web Speech API
   useEffect(() => {
@@ -113,7 +124,7 @@ export function ProblemFormPage({ onBack, address, onSubmit }: ProblemFormPagePr
             <ArrowLeft className="w-6 h-6 text-gray-900" strokeWidth={2} />
           </button>
           <h1 className="text-xl font-semibold text-gray-900">
-            За місцем проживання
+            {headerTitle}
           </h1>
         </div>
       </div>
@@ -122,22 +133,24 @@ export function ProblemFormPage({ onBack, address, onSubmit }: ProblemFormPagePr
       <div className="flex-1 px-6 py-6 overflow-y-auto pb-28">
         {/* Блок з адресою */}
         <div className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-          <p className="text-gray-700 text-sm leading-relaxed">
-            Місце проживання зазначено в банку:{'\n'}
+          <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+            {isHomeMode ? 'Місце проживання зазначено в банку:\n' : ''}
             {displayAddress}
           </p>
         </div>
 
-        {/* Кнопка "Змінити" */}
-        <button 
-          onClick={() => setShowAddressModal(true)}
-          className="w-full bg-gray-100 border-2 border-gray-300 rounded-2xl px-5 py-4 mb-8 flex items-center justify-center gap-2 hover:bg-gray-200 hover:border-gray-400 transition-colors"
-        >
-          <Edit2 className="w-5 h-5 text-gray-700" strokeWidth={2} />
-          <span className="text-gray-900 font-medium text-[15px]">
-            Змінити
-          </span>
-        </button>
+        {/* Кнопка "Змінити" тільки для домашнього режиму */}
+        {isHomeMode && (
+          <button 
+            onClick={() => setShowAddressModal(true)}
+            className="w-full bg-gray-100 border-2 border-gray-300 rounded-2xl px-5 py-4 mb-8 flex items-center justify-center gap-2 hover:bg-gray-200 hover:border-gray-400 transition-colors"
+          >
+            <Edit2 className="w-5 h-5 text-gray-700" strokeWidth={2} />
+            <span className="text-gray-900 font-medium text-[15px]">
+              Змінити
+            </span>
+          </button>
+        )}
 
         {/* Заголовок форми */}
         <h2 className="text-gray-900 font-semibold text-base mb-3">
@@ -206,7 +219,7 @@ export function ProblemFormPage({ onBack, address, onSubmit }: ProblemFormPagePr
       </div>
 
       {/* Попап "Нова Адреса" */}
-      {showAddressModal && (
+      {showAddressModal && isHomeMode && (
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-6">
           <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
             <h2 className="text-xl font-bold text-gray-900 text-center mb-6">

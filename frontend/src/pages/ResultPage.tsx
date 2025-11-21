@@ -6,6 +6,7 @@ interface ResultPageProps {
   onBack: () => void;
   onFinish: () => void;
   problemText: string;
+  mode?: 'home' | 'other';
   // Mock дані - пізніше прийдуть з API
   mockResponse?: {
     serviceName: string;
@@ -15,10 +16,13 @@ interface ResultPageProps {
   };
 }
 
-export function ResultPage({ onBack, onFinish, problemText, mockResponse }: ResultPageProps) {
+export function ResultPage({ onBack, onFinish, problemText, mode = 'home', mockResponse }: ResultPageProps) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackCompleted, setFeedbackCompleted] = useState(false);
+
+  // Заголовок в залежності від режиму
+  const headerTitle = mode === 'home' ? 'За місцем проживання' : 'Інша адреса';
 
   // Mock дані для демо
   const response = mockResponse || {
@@ -47,7 +51,7 @@ export function ResultPage({ onBack, onFinish, problemText, mockResponse }: Resu
             <ArrowLeft className="w-6 h-6 text-gray-900" strokeWidth={2} />
           </button>
           <h1 className="text-xl font-semibold text-gray-900 truncate">
-            За місцем проживання
+            {headerTitle}
           </h1>
         </div>
       </div>

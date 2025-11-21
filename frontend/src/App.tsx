@@ -21,6 +21,8 @@ function App() {
   const [currentPage, setCurrentPage] = useState<'home' | 'classifier' | 'map' | 'form' | 'result'>('home');
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [problemText, setProblemText] = useState('');
+  const [formContext, setFormContext] = useState<'home' | 'other'>('home');
+  const [otherAddressLabel, setOtherAddressLabel] = useState<string | null>(null);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -41,6 +43,8 @@ function App() {
                   setCurrentPage('map');
                 } else {
                   // "За місцем проживання" - одразу на форму з хардкодженою адресою
+                  setFormContext('home');
+                  setOtherAddressLabel(null);
                   setCurrentPage('form');
                 }
               }}
@@ -50,18 +54,20 @@ function App() {
           {currentPage === 'map' && (
             <MapPage
               onBack={() => setCurrentPage('classifier')}
-              onSelectLocation={(lat, lng) => {
+              onSelectLocation={({ lat, lng, addressLabel }) => {
                 setSelectedLocation({ lat, lng });
-                console.log('Обрана адреса:', lat, lng);
-                // TODO: В майбутньому тут буде форма з адресою з карти
-                setCurrentPage('result');
+                setOtherAddressLabel(addressLabel);
+                setFormContext('other');
+                setCurrentPage('form');
               }}
             />
           )}
           
           {currentPage === 'form' && (
             <ProblemFormPage
-              onBack={() => setCurrentPage('classifier')}
+              mode={formContext}
+              presetAddress={formContext === 'other' ? otherAddressLabel ?? undefined : undefined}
+              onBack={() => setCurrentPage(formContext === 'other' ? 'map' : 'classifier')}
               onSubmit={(text) => {
                 setProblemText(text);
                 console.log('Опис проблеми:', text);
@@ -72,6 +78,7 @@ function App() {
           
           {currentPage === 'result' && (
             <ResultPage
+              mode={formContext}
               onBack={() => setCurrentPage('form')}
               onFinish={() => setCurrentPage('home')}
               problemText={problemText}

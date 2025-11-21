@@ -102,11 +102,11 @@ export function FeedbackModal({ isOpen, onClose, onComplete }: FeedbackModalProp
                     <button
                       key={emoji}
                       onClick={() => handleEmojiSelect(emoji)}
-                      className={`relative w-14 h-14 text-4xl hover:scale-110 transition-all ${
-                        selectedEmoji === emoji ? 'grayscale' : ''
-                      }`}
+                      className="relative w-14 h-14 text-4xl hover:scale-110 transition-all"
                     >
-                      {emoji}
+                      <span className={selectedEmoji === emoji ? 'grayscale' : ''}>
+                        {emoji}
+                      </span>
                       {selectedEmoji === emoji && (
                         <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                           <Check className="w-4 h-4 text-white" strokeWidth={3} />
