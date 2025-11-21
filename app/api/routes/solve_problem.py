@@ -13,7 +13,7 @@ from app.services.orchestrator import OrchestrationService
 
 router = APIRouter(prefix="/solve", tags=["solve problem"])
 
-
+# TODO: clean-up - remove name and phone from request and response models
 @router.post("/", response_model=OrchestrationResponse)
 async def solve_problem(
     request: OrchestrationRequest,
@@ -30,9 +30,9 @@ async def solve_problem(
     
     Args:
         request: OrchestrationRequest containing:
-            - name: User's name (should be removed, but remains for compatibility with rest of API)
+            - name: User's name
             - address: Address where problem occurred
-            - phone: User's phone (should be removed, but remains for compatibility with rest of API)
+            - phone: User's phone
             - problem_text: Description of the problem
         db: Database session
         

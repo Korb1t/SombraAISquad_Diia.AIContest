@@ -14,7 +14,7 @@ def load_categories_and_examples(session: Session, categories_file: str, force: 
     with open(categories_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    embeddings_model = None 
+    embeddings_model = get_embeddings() 
 
     added_cats, updated_cats = 0, 0
     added_ex, skipped_ex = 0, 0
@@ -52,8 +52,8 @@ def load_categories_and_examples(session: Session, categories_file: str, force: 
 
             # Initialize embeddings client only when needed
             if not embeddings_model:
-                print("   [i] Initializing Embedding Model...")
-                embeddings_model = get_embeddings()
+                print("   [!] Embeddings model is not available.")
+                return
 
             print(f"   Generating embedding for: {example_text[:30]}...")
             embedding = embeddings_model.embed_query(example_text)

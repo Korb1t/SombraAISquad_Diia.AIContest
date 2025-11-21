@@ -105,7 +105,7 @@ class OrchestrationService:
             # Try to extract building number from the second part
             building = parts[1] if len(parts) > 1 else ""
             # Extract only the number from building string if it contains text
-            building = ''.join(c for c in building.split()[0] if c.isdigit()) or building
+            building = ''.join(c for c in (building.split()[0] if building.split() else building) if c.isdigit()) or building
         else:
             # No comma, use whole string as street
             street = address.strip()
@@ -113,5 +113,5 @@ class OrchestrationService:
         
         return {
             "street": street if street else address,
-            "building": building if building else "0"
+            "building": building if building else ""
         }

@@ -3,6 +3,7 @@ Schemas for end-to-end orchestration flow.
 Combines user info, problem classification, service resolution, and appeal generation.
 """
 from pydantic import BaseModel, Field
+
 from app.schemas.base import PersonalInfo
 from app.schemas.problems_schemas import ProblemClassificationResponse
 from app.schemas.services import ServiceResponse
