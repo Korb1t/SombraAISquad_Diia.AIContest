@@ -12,8 +12,8 @@ class BaseClassifier(ABC):
         self.session = session
 
     @abstractmethod
-    def classify(self, problem_text: str) -> Tuple[str, float, str]:
-        """Must return (category_id, confidence, reasoning)"""
+    def classify(self, problem_text: str) -> Tuple[str, float, str, bool, bool]:
+        """Must return (category_id, confidence, reasoning, is_urgent, is_relevant)"""
         pass
 
     def get_category_info(self, category_id: str) -> Category | None:
@@ -21,7 +21,7 @@ class BaseClassifier(ABC):
 
     def classify_with_category(self, problem_text: str) -> dict:
         """Shared logic for formatting the final response"""
-        category_id, confidence, reasoning, is_urgent = self.classify(problem_text)
+        category_id, confidence, reasoning, is_urgent, is_relevant = self.classify(problem_text)
         
         if category_id == "other":
              return {
@@ -30,7 +30,8 @@ class BaseClassifier(ABC):
                 "category_description": "Could not determine specific category",
                 "confidence": confidence,
                 "reasoning": reasoning,
-                "is_urgent": False
+                "is_urgent": False,
+                "is_relevant": is_relevant
             }
 
         category = self.get_category_info(category_id)
@@ -42,7 +43,8 @@ class BaseClassifier(ABC):
                 "category_description": "Category ID exists in model but not DB",
                 "confidence": confidence,
                 "reasoning": reasoning,
-                "is_urgent": False
+                "is_urgent": False,
+                "is_relevant": is_relevant
             }
         
         return {
@@ -51,5 +53,6 @@ class BaseClassifier(ABC):
             "category_description": category.description,
             "confidence": confidence,
             "reasoning": reasoning,
-            "is_urgent": is_urgent
+            "is_urgent": is_urgent,
+            "is_relevant": is_relevant
         }
