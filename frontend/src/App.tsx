@@ -19,7 +19,7 @@ const queryClient = new QueryClient({
 
 function App() {
   const [currentPage, setCurrentPage] = useState<'home' | 'classifier' | 'map' | 'form' | 'result'>('home');
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [_selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [problemText, setProblemText] = useState('');
   const [formContext, setFormContext] = useState<'home' | 'other'>('home');
   const [otherAddressLabel, setOtherAddressLabel] = useState<string | null>(null);

@@ -211,11 +211,10 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
           center={markerPosition}
           zoom={15}
           style={{ height: '100%', width: '100%' }}
-          ref={mapRef}
-          zoomControl={false}
-          whenCreated={(mapInstance) => {
-            mapRef.current = mapInstance;
+          ref={(map) => {
+            if (map) mapRef.current = map;
           }}
+          zoomControl={false}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
