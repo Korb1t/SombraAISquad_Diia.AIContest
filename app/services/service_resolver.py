@@ -1,7 +1,7 @@
 from typing import Optional
 from sqlmodel import Session, select
 from app.db_models import Service, Building, ServiceAssignment
-from app.schemas.services import ServiceResponse
+from app.schemas.services import ServiceResponse, ServiceInfo
 
 # TODO: Move category definitions out
 # Definition of categories we consider "district-level"
@@ -42,11 +42,14 @@ class ServiceRouter:
             category_name=category_name,
             confidence=confidence,
             is_urgent=is_urgent,
-            service_name=service.name_ua,
-            phone_main=service.phone_main,
-            email_main=service.email_main,
-            address_legal=service.address_legal,
-            website=service.website,
+            service_info=ServiceInfo(
+                service_type=service.type,
+                service_name=service.name_ua,
+                service_phone=service.phone_main,
+                service_email=service.email_main,
+                service_address=service.address_legal,
+                service_website=service.website,
+            ),
             reasoning=reasoning
         )
         
@@ -76,11 +79,14 @@ class ServiceRouter:
             category_name=category_name,
             confidence=0.0,
             is_urgent=is_urgent,
-            service_name="Невідома служба",
-            phone_main="1580",
-            email_main=None,
-            address_legal=None,
-            website=None,
+            service_info=ServiceInfo(
+                service_type="Гаряча лінія",
+                service_name="Невідома служба",
+                service_phone="1580",
+                service_email=None,
+                service_address=None,
+                service_website=None,
+            ),
             reasoning="Критична помилка: Не вдалося знайти навіть аварійну/диспетчерську службу в базі даних."
         )
 
