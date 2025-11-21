@@ -132,7 +132,7 @@ class ServiceRouter:
                 )
 
             # If no specific emergency service, return the general hotline as an urgent fallback
-            return self._get_hotline_fallback(category_id=category_id, category_name=category.name, is_urgent=True)
+            return self._get_hotline_fallback(category_id=category_id, category_name="", is_urgent=True)
 
         # --- 2. BUILDING-LEVEL RESPONSIBILITY (OSBB/LKP) ---
         if category_id not in RA_CATEGORIES and building_id is not None:
@@ -145,7 +145,7 @@ class ServiceRouter:
                 .where(ServiceAssignment.category_id == category_id)
                 .where(ServiceAssignment.building_id == building_id)
                 .where(ServiceAssignment.is_primary)
-                .where(Service.type.in_(['ОСББ', 'ЛКП/УК'])) # Лише керуючі компанії
+                .where(Service.type.in_(['ОСББ', 'ЛКП/УК']))
             )
             specific_result = self.session.exec(specific_stmt).first()
 
@@ -216,4 +216,4 @@ class ServiceRouter:
                 )
 
         # --- 5. HOTLINE FALLBACK ---
-        return self._get_hotline_fallback(category_id=category_id, category_name=category.name, is_urgent=is_urgent)
+        return self._get_hotline_fallback(category_id=category_id, category_name="", is_urgent=is_urgent)

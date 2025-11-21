@@ -20,6 +20,7 @@ class Example(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     category_id: str = Field(foreign_key="categories.id", index=True)
     text: str
+    is_urgent: bool = Field(default=False, index=True)
     
     # pgvector embedding
     embedding: list[float] = Field(sa_column=Column(Vector(1536)))
