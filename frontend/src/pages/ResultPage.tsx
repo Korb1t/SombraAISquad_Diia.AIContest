@@ -50,11 +50,11 @@ export function ResultPage({ onBack, onFinish, problemText, mode = 'home', apiRe
       </div>
 
       <div className="flex-1 px-6 py-6 flex flex-col overflow-hidden min-h-0">
-        <h2 className="text-gray-900 font-semibold text-sm mb-3 flex-shrink-0">
+        <h2 className="text-gray-900 font-semibold text-sm mb-2 flex-shrink-0">
           Твій запит
         </h2>
 
-        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm relative flex-1 min-h-0 flex flex-col">
+        <div className="bg-white rounded-2xl p-6 mb-4 shadow-sm relative flex-[2] min-h-0 flex flex-col">
           <div className="overflow-y-auto flex-1 pr-10 overscroll-contain">
             <p className="text-gray-700 text-sm leading-relaxed break-words overflow-wrap-anywhere whitespace-pre-line">
               {appealText}
@@ -76,27 +76,27 @@ export function ResultPage({ onBack, onFinish, problemText, mode = 'home', apiRe
         </div>
 
         <div className="flex-shrink-0">
-          <h2 className="text-gray-900 font-semibold text-sm mb-2">
+          <h2 className="text-gray-900 font-semibold text-xs mb-1">
             Рекомендовані служби:
           </h2>
-          <p className="text-gray-700 text-sm mb-4">
+          <p className="text-gray-700 text-xs mb-3">
             {serviceName}
           </p>
 
-          <h2 className="text-gray-900 font-semibold text-sm mb-3">
+          <h2 className="text-gray-900 font-semibold text-xs mb-2">
             Контакти:
           </h2>
 
           {phone && (
-            <div className="flex items-center justify-between py-2 mb-1 gap-2">
-              <span className="text-gray-700 text-xs break-all">
+            <div className="flex items-center justify-between py-1.5 mb-0.5 gap-2">
+              <span className="text-gray-600 text-xs break-all">
                 {phone}
               </span>
               <button
                 onClick={() => copyToClipboard(phone, 'phone')}
-                className="w-7 h-7 flex-shrink-0 flex items-center justify-center hover:bg-gray-200 rounded-lg transition-colors relative"
+                className="w-6 h-6 flex-shrink-0 flex items-center justify-center hover:bg-gray-200 rounded-lg transition-colors relative"
               >
-                <Copy className="w-4 h-4 text-gray-600" strokeWidth={2} />
+                <Copy className="w-3.5 h-3.5 text-gray-600" strokeWidth={2} />
                 {copiedField === 'phone' && (
                   <div className="absolute -top-8 right-0 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
                     Скопійовано
@@ -107,15 +107,15 @@ export function ResultPage({ onBack, onFinish, problemText, mode = 'home', apiRe
           )}
 
           {email && (
-            <div className="flex items-center justify-between py-2 mb-1 gap-2">
-              <span className="text-gray-700 text-xs break-all">
+            <div className="flex items-center justify-between py-1.5 mb-0.5 gap-2">
+              <span className="text-gray-600 text-xs break-all">
                 {email}
               </span>
               <button
                 onClick={() => copyToClipboard(email, 'email')}
-                className="w-7 h-7 flex-shrink-0 flex items-center justify-center hover:bg-gray-200 rounded-lg transition-colors relative"
+                className="w-6 h-6 flex-shrink-0 flex items-center justify-center hover:bg-gray-200 rounded-lg transition-colors relative"
               >
-                <Copy className="w-4 h-4 text-gray-600" strokeWidth={2} />
+                <Copy className="w-3.5 h-3.5 text-gray-600" strokeWidth={2} />
                 {copiedField === 'email' && (
                   <div className="absolute -top-8 right-0 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
                     Скопійовано
@@ -125,8 +125,8 @@ export function ResultPage({ onBack, onFinish, problemText, mode = 'home', apiRe
             </div>
           )}
 
-          <div className="py-2">
-            <p className="text-gray-500 text-xs leading-relaxed">
+          <div className="py-1.5">
+            <p className="text-gray-500 text-[11px] leading-relaxed">
               {workingHours}
             </p>
           </div>

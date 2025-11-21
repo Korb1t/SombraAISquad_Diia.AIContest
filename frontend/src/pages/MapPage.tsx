@@ -163,7 +163,6 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
       label = await getAddressFromCoords(markerPosition[0], markerPosition[1]);
     }
     
-    await new Promise((resolve) => setTimeout(resolve, 1500));
     setIsLoading(false);
     
     onSelectLocation({
@@ -211,10 +210,13 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
           center={markerPosition}
           zoom={15}
           style={{ height: '100%', width: '100%' }}
-          ref={(map) => {
-            if (map) mapRef.current = map;
-          }}
+          ref={mapRef}
           zoomControl={false}
+          whenReady={() => {
+            if (mapRef.current) {
+              console.log('Map ready');
+            }
+          }}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

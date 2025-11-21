@@ -19,7 +19,6 @@ const queryClient = new QueryClient({
 
 function App() {
   const [currentPage, setCurrentPage] = useState<'home' | 'classifier' | 'map' | 'form' | 'result'>('home');
-  const [_selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [problemText, setProblemText] = useState('');
   const [formContext, setFormContext] = useState<'home' | 'other'>('home');
   const [otherAddressLabel, setOtherAddressLabel] = useState<string | null>(null);
@@ -51,8 +50,7 @@ function App() {
           {currentPage === 'map' && (
             <MapPage
               onBack={() => setCurrentPage('classifier')}
-              onSelectLocation={({ lat, lng, addressLabel }) => {
-                setSelectedLocation({ lat, lng });
+              onSelectLocation={({ addressLabel }) => {
                 setOtherAddressLabel(addressLabel);
                 setFormContext('other');
                 setCurrentPage('form');

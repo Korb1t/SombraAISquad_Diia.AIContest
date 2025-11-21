@@ -15,6 +15,7 @@ export interface ProblemClassification {
   category_name: string;
   confidence: number;
   is_urgent: boolean;
+  is_relevant?: boolean;
   category_description: string;
   reasoning: string;
 }

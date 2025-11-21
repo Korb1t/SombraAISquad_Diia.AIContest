@@ -1,4 +1,4 @@
-import { type ReactNode, useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { Wifi, Signal, BatteryMedium } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

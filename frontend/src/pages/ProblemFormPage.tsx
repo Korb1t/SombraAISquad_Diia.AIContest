@@ -120,7 +120,19 @@ export function ProblemFormPage({
         },
         onError: (error: any) => {
           console.error('Помилка API:', error);
-          const errorMsg = error?.response?.data?.detail || 'Зачекайте та спробуйте ще раз.';
+          let errorMsg = 'Зачекайте та спробуйте ще раз.';
+          
+          if (error?.response?.data?.detail) {
+            const detail = error.response.data.detail;
+            if (typeof detail === 'string') {
+              errorMsg = detail;
+            } else if (Array.isArray(detail)) {
+              errorMsg = detail.map((d: any) => d.msg || JSON.stringify(d)).join(', ');
+            } else {
+              errorMsg = JSON.stringify(detail);
+            }
+          }
+          
           setErrorMessage(errorMsg);
           setShowErrorModal(true);
         },
