@@ -73,7 +73,8 @@ class OrchestrationService:
         user_info = PersonalInfo(
             name=request.user_info.name,
             address=request.user_info.address,
-            phone=request.user_info.phone
+            phone=request.user_info.phone,
+            city=request.user_info.city
         )
         
         return OrchestrationResponse(
