@@ -75,7 +75,7 @@ class LLMClassifier(BaseClassifier):
         similar_examples = self._get_similar_examples(sanitized_text, top_k=5)
         
         if not similar_examples:
-            return "other", 0.5, "No similar examples found in database", False, True
+            return "other", 0.5, "No similar examples found in database", False, False
         
         # Step 2: Build few-shot prompt
         prompt = self._build_few_shot_prompt(sanitized_text, similar_examples)
