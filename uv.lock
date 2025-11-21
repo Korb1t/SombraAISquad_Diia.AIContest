@@ -1819,7 +1819,6 @@ dependencies = [
     { name = "langchain" },
     { name = "langchain-openai" },
     { name = "openpyxl" },
-    { name = "pandas" },
     { name = "pgvector" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic-settings" },
@@ -1830,6 +1829,7 @@ dependencies = [
 
 [package.dev-dependencies]
 test = [
+    { name = "pandas" },
     { name = "scikit-learn" },
 ]
 
@@ -1841,7 +1841,6 @@ requires-dist = [
     { name = "langchain", specifier = ">=1.0.5" },
     { name = "langchain-openai", specifier = ">=1.0.2" },
     { name = "openpyxl", specifier = ">=3.1.5" },
-    { name = "pandas", specifier = ">=2.3.3" },
     { name = "pgvector", specifier = ">=0.3.6" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2.3" },
     { name = "pydantic-settings", specifier = ">=2.12.0" },
@@ -1851,7 +1850,10 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-test = [{ name = "scikit-learn", specifier = ">=1.7.2" }]
+test = [
+    { name = "pandas", specifier = ">=2.3.3" },
+    { name = "scikit-learn", specifier = ">=1.7.2" },
+]
 
 [[package]]
 name = "sqlalchemy"

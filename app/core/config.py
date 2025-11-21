@@ -66,7 +66,7 @@ class Settings(BaseSettings):
     CLASSIFIER_THRESHOLD: float = 0.4
 
     # TOP_K: Number of nearest neighbors for k-NN voting
-    # Optimized with balanced test set (10 samples per category):
+    # Rationale: Changed from 7 to 3 after empirical testing on a balanced test set
     TOP_K: int = 3
 
     @computed_field  # type: ignore[prop-decorator]

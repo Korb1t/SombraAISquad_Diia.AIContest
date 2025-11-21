@@ -3,7 +3,7 @@ from sqlmodel import Session
 
 from app.api.deps import get_db
 from app.core.logging import get_logger
-from app.schemas.problems_schemas import ProblemRequest, ProblemClassificationResponse
+from app.schemas.problems import ProblemRequest, ProblemClassificationResponse
 from app.services.classifier.classifier_factory import get_classifier
 
 router = APIRouter(prefix="/classify", tags=["classification"])
