@@ -16,7 +16,7 @@ class KNNClassifier(BaseClassifier):
         super().__init__(session)
         self.embeddings = get_embeddings()
 
-    def classify(self, problem_text: str) -> Tuple[str, float, str]:
+    def classify(self, problem_text: str) -> Tuple[str, float, str, bool, bool]:
         query_embedding = self.embeddings.embed_query(problem_text)
 
         statement = (
@@ -27,7 +27,7 @@ class KNNClassifier(BaseClassifier):
         neighbors = self.session.exec(statement).all()
         
         if not neighbors:
-            return "other", 0.0, "No historical examples found."
+            return "other", 0.0, "No historical examples found.", False, True
 
         votes = [ex.category_id for ex in neighbors]
         vote_counts = Counter(votes)
@@ -43,7 +43,9 @@ class KNNClassifier(BaseClassifier):
         )
 
         # Todo: ML urgency detection should be added later
+        # KNN cannot determine relevance, assumes relevant if historical data exists
         is_urgent = False
+        is_relevant = True
 
-        return winner, round(confidence, 2), reasoning, is_urgent
+        return winner, round(confidence, 2), reasoning, is_urgent, is_relevant
 

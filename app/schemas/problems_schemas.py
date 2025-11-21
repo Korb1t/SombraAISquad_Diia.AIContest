@@ -18,6 +18,7 @@ class ProblemRequest(BaseModel):
 
 class ProblemClassificationResponse(ClassificationBase):
     """Classification analysis response"""
+    is_relevant: bool = Field(..., description="Whether this is actually a municipal utility problem")
     category_description: str = Field(..., description="Category description")
     reasoning: str = Field(..., description="Explanation why this category was chosen")
 
