@@ -3,11 +3,11 @@ from collections import Counter
 from sqlmodel import Session, select
 
 from app.core.config import settings
-from app.db_models import Example, Category
+from app.db_models import Example
 from app.llm.client import get_embeddings
-from app.services.classifier.base_classifier import BaseClassifier # Припускаємо, що це шлях до BaseClassifier
+from app.services.classifier.base_classifier import BaseClassifier
 
-
+# TODO: Remove is_relevant as field and add as new category
 class KNNClassifier(BaseClassifier):
     """
     Math-based classifier using Vector Voting.
@@ -35,7 +35,7 @@ class KNNClassifier(BaseClassifier):
         )
 
         if filter_max_id is not None:
-             statement = statement.where(Example.id <= filter_max_id)
+            statement = statement.where(Example.id <= filter_max_id)
              
         return self.session.exec(statement).all()
 
@@ -44,7 +44,7 @@ class KNNClassifier(BaseClassifier):
         Classify the problem by category and determine its urgency (is_urgent).
         
         Returns:
-            Tuple[category_id, confidence, reasoning, is_urgent]
+            Tuple[category_id, confidence, reasoning, is_urgent, is_relevant]
         """
         k_neighbors = settings.TOP_K 
         query_embedding = self.embeddings.embed_query(problem_text)
@@ -72,7 +72,6 @@ class KNNClassifier(BaseClassifier):
         # If no neighbors found even in tagged zone, we cannot determine urgency.
         if not neighbors_urgency:
              is_urgent_result = False
-             confidence_urgent = 0.0
              
              reasoning = (
                  f"[KNN] Category: '{winner_cat}' ({count_cat}/{len(neighbors_category)} votes). "
@@ -87,7 +86,7 @@ class KNNClassifier(BaseClassifier):
         urgent_votes = sum(1 for ex in neighbors_urgency if ex.is_urgent)
         
         # 2. Determine urgency: Majority voting
-        is_urgent_result = urgent_votes > (k_neighbors / 2) 
+        is_urgent_result = urgent_votes > (len(neighbors_urgency) / 2) 
         
         # 3. Confidence for urgency (number of True votes / Total)
         confidence_urgent = urgent_votes / len(neighbors_urgency) 

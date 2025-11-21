@@ -24,7 +24,7 @@ from app.llm.client import get_embeddings
 
 MAX_EXAMPLES_PER_FOLD_DB = 10
 LOG_PROGRESS_N = 10
-MAX_URGENCY_TAGGED_ID = 2370  # Only IDs < 2000 are reliably tagged for urgency
+MAX_URGENCY_TAGGED_ID = 2370  # Only IDs < 2370 are reliably tagged for urgency
 MAX_EXAMPLES_TO_TEST = 1000  # Limit total examples to test (None = no limit, use all)
 
 
@@ -151,7 +151,7 @@ def evaluate_classification_and_urgency(
         confidences_cat.append(confidence_cat)
         
         # === URGENCY DETECTION ===
-        # Use only neighbors with ID < 2000 for urgency (they're correctly tagged)
+        # Use only neighbors with ID <= MAX_URGENCY_TAGGED_ID for urgency (they're correctly tagged)
         statement_urgent = (
             select(Example)
             .where(Example.id <= MAX_URGENCY_TAGGED_ID)
