@@ -110,7 +110,7 @@ class LLMClassifier(BaseClassifier):
             return category_id, confidence, reasoning, is_urgent, is_relevant
             
         except (json.JSONDecodeError, KeyError, ValueError) as e:
-            return "other", 0.5, f"LLM response parsing error: {str(e)}", False, True
+            return "other", 0.5, f"LLM response parsing error: {str(e)}", False, False
     
     def get_category_info(self, category_id: str) -> Category | None:
         """Get category information"""
