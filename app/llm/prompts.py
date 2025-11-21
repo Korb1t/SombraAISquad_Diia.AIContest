@@ -12,7 +12,7 @@ def _load_prompt(filename: str) -> str:
 
 
 # Classifier prompts
-CLASSIFIER_PROMPT_TEMPLATE = _load_prompt("classifier.txt")
+CLASSIFIER_SAFE_TEMPLATE = _load_prompt("classifier_safe.txt")
 
 # Voice input prompts
 AUDIO_TRANSCRIPTION_PROMPT = _load_prompt("audio_transcription.txt")

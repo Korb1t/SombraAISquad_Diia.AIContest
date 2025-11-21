@@ -2,11 +2,11 @@ from typing import Tuple
 import json
 
 from sqlmodel import Session, select
-from app.db_models import Category, Example
 from app.llm.client import get_llm, get_embeddings
-from app.llm.prompts import CLASSIFIER_PROMPT_TEMPLATE
+from app.llm.prompts import CLASSIFIER_SAFE_TEMPLATE
 from app.services.classifier.base_classifier import BaseClassifier
 from app.db_models import Category, Example
+from app.utils.security import sanitize_prompt_input
 
 
 class LLMClassifier(BaseClassifier):
@@ -39,7 +39,7 @@ class LLMClassifier(BaseClassifier):
         return results
 
     def _build_few_shot_prompt(self, problem_text: str, similar_examples: list[Example]) -> str:
-        """Build prompt with few-shot examples"""
+        """Build secure prompt with few-shot examples"""
 
         # Get all categories
         categories = self.session.exec(select(Category)).all()
@@ -52,8 +52,8 @@ class LLMClassifier(BaseClassifier):
             examples_text += f"Text: \"{example.text}\"\n"
             examples_text += f"Category: {example.category_id}\n"
 
-        # Use prompt template from prompts.py
-        prompt = CLASSIFIER_PROMPT_TEMPLATE.format(
+        # Use safe prompt template from file
+        prompt = CLASSIFIER_SAFE_TEMPLATE.format(
             categories_list=categories_list,
             examples_text=examples_text,
             problem_text=problem_text
@@ -68,14 +68,17 @@ class LLMClassifier(BaseClassifier):
         Returns:
             Tuple[category_id, confidence, reasoning, is_urgent]
         """
+        # Step 0: Sanitize input to prevent prompt injection
+        sanitized_text = sanitize_prompt_input(problem_text, max_length=2000)
+        
         # Step 1: Find similar examples through RAG
-        similar_examples = self._get_similar_examples(problem_text, top_k=5)
+        similar_examples = self._get_similar_examples(sanitized_text, top_k=5)
         
         if not similar_examples:
             return "other", 0.5, "No similar examples found in database", False
         
         # Step 2: Build few-shot prompt
-        prompt = self._build_few_shot_prompt(problem_text, similar_examples)
+        prompt = self._build_few_shot_prompt(sanitized_text, similar_examples)
         
         # Step 3: Get classification from LLM (includes urgency check now)
         llm = self._get_llm()
