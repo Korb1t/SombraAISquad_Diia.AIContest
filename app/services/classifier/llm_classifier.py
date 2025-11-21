@@ -2,7 +2,6 @@ from typing import Tuple
 import json
 
 from sqlmodel import Session, select
-from app.db_models import Category, Example
 from app.llm.client import get_llm, get_embeddings
 from app.llm.prompts import CLASSIFIER_SAFE_TEMPLATE
 from app.services.classifier.base_classifier import BaseClassifier

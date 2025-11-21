@@ -20,7 +20,7 @@ async def classify_problem(
     try:
         classifier = get_classifier(db)
         result = classifier.classify_with_category(request.problem_text)
-        logger.info(f"Classification result: category={result.get('category_name')}, confidence={result.get('confidence'):.2f}")
+        logger.info(f"Classification result: category={result.get('category_name')}, confidence={result.get('confidence', 0.0):.2f}")
         return ProblemClassificationResponse(**result)
     except Exception as e:
         logger.error(f"Classification error: {str(e)}")
