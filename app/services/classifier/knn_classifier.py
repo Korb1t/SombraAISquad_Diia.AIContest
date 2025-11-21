@@ -17,6 +17,9 @@ class KNNClassifier(BaseClassifier):
     # TEMP VARIABLE WHILE DB IS BEING TAGGED FOR URGENCY
     MAX_URGENCY_TAGGED_ID = 2370  # Only IDs < 2370 are reliably tagged for urgency
 
+    # TODO: Implement is_relevant classification
+    is_relevant = True
+
     def __init__(self, session: Session):
         super().__init__(session)
         self.embeddings = get_embeddings()
@@ -51,7 +54,7 @@ class KNNClassifier(BaseClassifier):
         neighbors_category = self._get_nearest_neighbors(query_embedding, k_neighbors)
         
         if not neighbors_category:
-            return "other", 0.0, "No historical examples found for category classification.", False
+            return "other", 0.0, "No historical examples found for category classification.", False, self.is_relevant
 
         # --- A. VOTING FOR CATEGORY (Multi-Class) ---
         votes_cat = [ex.category_id for ex in neighbors_category]
@@ -75,7 +78,7 @@ class KNNClassifier(BaseClassifier):
                  f"[KNN] Category: '{winner_cat}' ({count_cat}/{len(neighbors_category)} votes). "
                  f"Urgency: Cannot be determined (No tagged neighbors found below ID {self.MAX_URGENCY_TAGGED_ID})."
              )
-             return winner_cat, round(confidence_cat, 2), reasoning, is_urgent_result
+             return winner_cat, round(confidence_cat, 2), reasoning, is_urgent_result, self.is_relevant
 
 
         # --- B. VOTING FOR URGENCY (Binary) ---
@@ -101,5 +104,4 @@ class KNNClassifier(BaseClassifier):
             f"Confidence in Urgency: {round(confidence_urgent, 2)}"
         )
 
-        return winner_cat, round(confidence_cat, 2), reasoning, is_urgent_result
-    
+        return winner_cat, round(confidence_cat, 2), reasoning, is_urgent_result, self.is_relevant
