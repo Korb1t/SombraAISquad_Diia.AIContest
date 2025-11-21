@@ -1,5 +1,5 @@
 """Service-related request and response schemas"""
-from typing import Literal, Optional
+from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.schemas.base import ClassificationBase
@@ -16,11 +16,9 @@ class IssueRequest(BaseModel):
 
 class ServiceResponse(ClassificationBase):
     """Response schema with responsible service contacts"""
-    service_name: str = Field(..., description="Name of the service")
-    phone_main: Optional[str] = Field(default=None, description="Main phone number")
-    email_main: Optional[str] = Field(default=None, description="Main email address")
-    address_legal: Optional[str] = Field(default=None)
-    website: Optional[str] = Field(default=None)
+    service_type: str = Field(..., description="Type of service")
+    phone_main: str | None = Field(default=None, description="Main phone number")
+    email_main: str | None = Field(default=None, description="Main email address")
     reasoning: str = Field(..., description="Explanation for service selection")
 
 

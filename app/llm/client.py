@@ -34,8 +34,8 @@ class SimpleLLM:
         self.client = _create_openai_client()
         self.model = settings.CODEMIE_LLM_MODEL
     
-    def invoke(self, prompt: str) -> str:
-        """Invoke LLM with prompt"""
+    def invoke(self, prompt: str):
+        """Invoke LLM with prompt and return Response object with .content attribute"""
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[{"role": "user", "content": prompt}],
@@ -47,6 +47,29 @@ class SimpleLLM:
                 self.content = text
         
         return Response(response.choices[0].message.content)
+    
+    async def generate_text(self, prompt: str, temperature: float = 0.7) -> str:
+        """
+        Generate text based on prompt (async version).
+        
+        Args:
+            prompt: Input prompt for text generation
+            temperature: Sampling temperature (0.0 to 1.0)
+            
+        Returns:
+            Generated text
+        """
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=temperature
+        )
+        
+        content = response.choices[0].message.content
+        if content is None:
+            raise ValueError("LLM returned empty response")
+        
+        return content
 
 
 class SimpleEmbeddings:

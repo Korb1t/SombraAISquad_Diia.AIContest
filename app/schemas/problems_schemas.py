@@ -25,5 +25,4 @@ class ProblemClassificationResponse(ClassificationBase):
 class ProblemResponse(ClassificationBase):
     """Full response with classification, service and letter"""
     service_info: PersonalInfo = Field(..., description="Service contact information")
-    email: str | None = Field(default=None, description="Service email contact")
     letter_text: str = Field(..., description="Generated letter text")

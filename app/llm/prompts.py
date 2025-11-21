@@ -12,12 +12,10 @@ def _load_prompt(filename: str) -> str:
 
 
 # Classifier prompts
-CLASSIFIER_PROMPT_TEMPLATE = _load_prompt("classifier.txt")
-
-# Letter generation prompts
-LETTER_SYSTEM_PROMPT = _load_prompt("letter_system.txt")
-LETTER_USER_PROMPT = _load_prompt("letter_user.txt")
+CLASSIFIER_SAFE_TEMPLATE = _load_prompt("classifier_safe.txt")
 
 # Voice input prompts
 AUDIO_TRANSCRIPTION_PROMPT = _load_prompt("audio_transcription.txt")
-EXTRACT_DATA_FROM_TEXT_PROMPT = _load_prompt("extract_data_from_text.txt")
+
+# Appeal template
+APPEAL_TEMPLATE = _load_prompt("appeal.txt")
