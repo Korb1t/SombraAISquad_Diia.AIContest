@@ -6,6 +6,7 @@ class PersonalInfo(BaseModel):
     """Common user information fields"""
     name: str | None = Field(default=None, description="Applicant name")
     address: str | None = Field(default=None, description="Applicant address")
+    city: str | None = Field(default=None, description="Applicant city")
     phone: str | None = Field(default=None, description="Applicant phone")
 
 

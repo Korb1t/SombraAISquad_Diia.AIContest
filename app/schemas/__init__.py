@@ -5,7 +5,7 @@ from app.schemas.problems_schemas import (
     ProblemRequest,
     ProblemResponse,
 )
-from .services import IssueRequest, ServiceInfo, ServiceResponse
+from app.schemas.services import IssueRequest, ServiceInfo, ServiceResponse
 
 __all__ = [
     # Base

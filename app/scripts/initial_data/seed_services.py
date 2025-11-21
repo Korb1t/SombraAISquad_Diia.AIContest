@@ -79,7 +79,7 @@ def get_or_create_assignment(session: Session, service_id: int, category_id: str
 
 
 def load_services_and_areas(session: Session):
-    """Load initial utility services using the new assignment structure."""
+    """Load initial utility services, sample buildings, and create service assignments.."""
     print("\n--- Loading Services ---")
 
     # 1. Define Standard Services (unchanged)
