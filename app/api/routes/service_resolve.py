@@ -6,6 +6,7 @@ from app.services.service_resolver import ServiceRouter
 
 router = APIRouter(prefix="/resolve_service", tags=["resolve service"])
 
+# TODO: Fix prints to use proper logging and more verbose exception messages
 @router.post("/", response_model=ServiceResponse)
 def route_problem_to_service(
     request: IssueRequest,

@@ -1,5 +1,6 @@
 from typing import Optional
 from sqlmodel import Session, select
+from app.db_models import Category
 from app.db_models import Service, Building, ServiceAssignment
 from app.schemas.services import ServiceResponse, ServiceInfo
 
@@ -13,7 +14,7 @@ CITYWIDE_MONOPOLISTS_CATEGORIES = ["water_supply", "heating", "gas", "lighting"]
 # Names of district administrations for validation, since they are tied to citywide
 RA_SERVICE_TYPES = ["РА"]
 
-# TODO: extract hardcoded strings
+# TODO: extract hardcoded strings and magic confidence numbers
 class ServiceRouter:
     """
     Router that determines the responsible service
@@ -111,49 +112,51 @@ class ServiceRouter:
         if is_urgent:
             # Search only for emergency services by category
             emergency_stmt = (
-                select(Service, ServiceAssignment)
+                select(Service, ServiceAssignment, Category)
                 .join(ServiceAssignment, Service.service_id == ServiceAssignment.service_id)
-                .where(Service.is_emergency == True)
+                .join(Category, Category.id == ServiceAssignment.category_id)
+                .where(Service.is_emergency.is_(True))
                 .where(ServiceAssignment.category_id == category_id)
             )
             emergency_result = self.session.exec(emergency_stmt).first()
             
             if emergency_result:
-                service, assignment = emergency_result
+                service, assignment, category = emergency_result
                 return self._format_response(
                     service,
                     confidence=0.95,
                     reasoning=f"Пріоритет: Знайдено аварійну службу {service.name_ua} для термінової проблеми '{category_id}'.",
                     category_id=category_id,
-                    category_name=assignment.category_id or "",
+                    category_name=category.name,
                     is_urgent=True
                 )
 
             # If no specific emergency service, return the general hotline as an urgent fallback
-            return self._get_hotline_fallback(category_id=category_id, category_name="", is_urgent=True)
+            return self._get_hotline_fallback(category_id=category_id, category_name=category.name, is_urgent=True)
 
         # --- 2. BUILDING-LEVEL RESPONSIBILITY (OSBB/LKP) ---
         if category_id not in RA_CATEGORIES and building_id is not None:
             
             # Search for assignment by specific building (highest specificity)
             specific_stmt = (
-                select(Service, ServiceAssignment)
+                select(Service, ServiceAssignment, Category)
                 .join(ServiceAssignment, Service.service_id == ServiceAssignment.service_id)
+                .join(Category, Category.id == ServiceAssignment.category_id)
                 .where(ServiceAssignment.category_id == category_id)
                 .where(ServiceAssignment.building_id == building_id)
-                .where(ServiceAssignment.is_primary == True)
+                .where(ServiceAssignment.is_primary)
                 .where(Service.type.in_(['ОСББ', 'ЛКП/УК'])) # Лише керуючі компанії
             )
             specific_result = self.session.exec(specific_stmt).first()
 
             if specific_result:
-                service, assignment = specific_result
+                service, assignment, category = specific_result
                 return self._format_response(
                     service,
                     confidence=0.9,
                     reasoning=f"Адресна прив'язка: Будинок {house_number} на вул. {street_name} обслуговується {service.name_ua}.",
                     category_id=category_id,
-                    category_name=assignment.category_id or "",
+                    category_name=category.name,
                     is_urgent=is_urgent
                 )
             
@@ -166,23 +169,25 @@ class ServiceRouter:
                 search_district = district[:-2] + "а"
             
             # Search for service of type "РА" (District Administration)
+            like_pattern = f"%{search_district}%"
             ra_stmt = (
-                select(Service, ServiceAssignment)
+                select(Service, ServiceAssignment, Category)
                 .join(ServiceAssignment, Service.service_id == ServiceAssignment.service_id)
+                .join(Category, Category.id == ServiceAssignment.category_id)
                 .where(ServiceAssignment.category_id == category_id)
                 .where(Service.type.in_(RA_SERVICE_TYPES))
-                .where(Service.name_ua.like(f"%{search_district}%")) # Search RA by district name
+                .where(Service.name_ua.like(like_pattern)) # Search RA by district name
             )
             ra_result = self.session.exec(ra_stmt).first()
             
             if ra_result:
-                service, assignment = ra_result
+                service, assignment, category = ra_result
                 return self._format_response(
                     service,
                     confidence=0.85,
                     reasoning=f"Районний рівень: Проблема '{category_id}' на вулиці {street_name} належить до юрисдикції {service.name_ua}.",
                     category_id=category_id,
-                    category_name=assignment.category_id or "",
+                    category_name=category.name,
                     is_urgent=is_urgent
                 )
 
@@ -190,8 +195,9 @@ class ServiceRouter:
         if category_id in CITYWIDE_MONOPOLISTS_CATEGORIES:
             
             citywide_stmt = (
-                select(Service, ServiceAssignment)
+                select(Service, ServiceAssignment, Category)
                 .join(ServiceAssignment, Service.service_id == ServiceAssignment.service_id)
+                .join(Category, Category.id == ServiceAssignment.category_id)
                 .where(ServiceAssignment.category_id == category_id)
                 .where(ServiceAssignment.coverage_level == 'citywide')
                 .where(Service.type == 'КП')
@@ -199,15 +205,15 @@ class ServiceRouter:
             citywide_result = self.session.exec(citywide_stmt).first()
             
             if citywide_result:
-                service, assignment = citywide_result
+                service, assignment, category = citywide_result
                 return self._format_response(
                     service,
                     confidence=0.7,
                     reasoning=f"Міський монополіст: Проблема '{category_id}' є загальноміською та обслуговується {service.name_ua}.",
                     category_id=category_id,
-                    category_name=assignment.category_id or "",
+                    category_name=category.name,
                     is_urgent=is_urgent
                 )
 
         # --- 5. HOTLINE FALLBACK ---
-        return self._get_hotline_fallback(category_id=category_id, category_name="", is_urgent=is_urgent)
+        return self._get_hotline_fallback(category_id=category_id, category_name=category.name, is_urgent=is_urgent)

@@ -19,4 +19,4 @@ This module handles the setup of the PostgreSQL database, including:
 ### Standard Run
 Safe to run multiple times. It checks if data exists before adding it (idempotent).
 ```bash
-python app/initial_data/main.py
+python app/scripts/initial_data/main.py

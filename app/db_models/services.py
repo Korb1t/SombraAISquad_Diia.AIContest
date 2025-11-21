@@ -1,6 +1,6 @@
 from typing import Optional, List
 from sqlalchemy import UniqueConstraint
-from sqlmodel import Column, Field, SQLModel, Relationship
+from sqlmodel import Field, SQLModel, Relationship
 
 
 class Service(SQLModel, table=True):
