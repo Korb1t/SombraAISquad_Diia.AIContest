@@ -5,7 +5,6 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import tridentImage from '@/assets/trident.png';
 
-// Створюємо кастомну іконку для маркера (червона шпилька)
 const customIcon = new L.Icon({
   iconUrl: 'data:image/svg+xml;base64,' + btoa(`
     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="55" viewBox="0 0 40 55">
@@ -49,16 +48,13 @@ const mockAddresses = [
   },
 ] as const;
 
-// Функція для отримання адреси з координат (для демо - mock)
 async function getAddressFromCoords(lat: number, lng: number): Promise<string> {
   try {
-    // Реальний API запит до Nominatim (OpenStreetMap)
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=uk`
     );
     const data = await response.json();
     
-    // Форматуємо адресу
     const addr = data.address;
     const parts = [];
     
@@ -77,7 +73,6 @@ async function getAddressFromCoords(lat: number, lng: number): Promise<string> {
   }
 }
 
-// Компонент для переміщення маркера при кліку
 function DraggableMarker({
   position,
   setPosition,
@@ -114,7 +109,6 @@ function DraggableMarker({
 }
 
 export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
-  // Київ - дефолтна позиція
   const [markerPosition, setMarkerPosition] = useState<[number, number]>([50.4501, 30.5234]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSearchPanel, setShowSearchPanel] = useState(false);
@@ -164,7 +158,6 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
   const handleSelect = async () => {
     setIsLoading(true);
     
-    // Отримуємо адресу якщо не вибрана зі списку
     let label = selectedAddressLabel;
     if (!label) {
       label = await getAddressFromCoords(markerPosition[0], markerPosition[1]);
@@ -189,7 +182,6 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
 
   return (
     <div className="h-full flex flex-col relative bg-[#e5eef8]">
-      {/* Header */}
       <div className="absolute top-0 left-0 right-0 z-[1000] bg-[#dfe8f4]">
         <div className="pt-14 pb-4 px-6">
           <div className="flex items-center gap-4">
@@ -206,7 +198,6 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
         </div>
       </div>
 
-      {/* Loader поверх карти (але під header) */}
       {isLoading && (
         <div className="absolute inset-0 top-[60px] z-[1100] bg-gray-100 flex items-center justify-center">
           <div className="animate-pulse">
@@ -215,7 +206,6 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
         </div>
       )}
 
-      {/* Карта */}
       <div className="flex-1 relative">
         <MapContainer
           center={markerPosition}
@@ -234,17 +224,13 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
           <DraggableMarker
             position={markerPosition}
             setPosition={setMarkerPosition}
-            onPositionChange={(pos) =>
-              setSelectedAddressLabel(
-                `Координати: ${pos[0].toFixed(4)}, ${pos[1].toFixed(4)}`
-              )
-            }
+            onPositionChange={() => {
+              setSelectedAddressLabel('');
+            }}
           />
         </MapContainer>
 
-        {/* Кнопки управління справа */}
-        <div className="absolute top-28 right-3 z-[1000] flex flex-col gap-2.5">
-          {/* Zoom In */}
+        <div className="absolute top-32 right-4 z-[1000] flex flex-col gap-2.5">
           <button
             onClick={handleZoomIn}
             className="w-11 h-11 bg-black rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
@@ -252,7 +238,6 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
             <Plus className="w-5 h-5 text-white" strokeWidth={2.5} />
           </button>
 
-          {/* Zoom Out */}
           <button
             onClick={handleZoomOut}
             className="w-11 h-11 bg-black rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
@@ -260,7 +245,6 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
             <Minus className="w-5 h-5 text-white" strokeWidth={2.5} />
           </button>
 
-          {/* Search */}
           <button
             onClick={() => {
               setShowSearchPanel(true);
@@ -272,8 +256,7 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
           </button>
         </div>
 
-        {/* Кнопка "Моя локація" внизу справа */}
-        <div className="absolute bottom-24 right-3 z-[1000]">
+        <div className="absolute bottom-24 right-4 z-[1000]">
           <button
             onClick={handleMyLocation}
             className="w-12 h-12 bg-black rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
@@ -282,7 +265,6 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
           </button>
         </div>
 
-        {/* Кнопка "Обрати" */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000]">
           <button
             onClick={handleSelect}
@@ -293,7 +275,6 @@ export function MapPage({ onBack, onSelectLocation }: MapPageProps) {
         </div>
       </div>
 
-      {/* Пошуковий оверлей */}
       {showSearchPanel && (
         <div className="absolute inset-0 z-[1300] bg-[#e5eef8] flex flex-col">
           <div className="pt-14 pb-4 px-6 flex items-center gap-4">

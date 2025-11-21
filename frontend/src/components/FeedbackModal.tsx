@@ -42,7 +42,6 @@ export function FeedbackModal({ isOpen, onClose, onComplete }: FeedbackModalProp
 
   const handleClose = () => {
     onClose();
-    // Reset після закриття
     setTimeout(() => {
       setStep('form');
       setSelectedEmoji(null);
@@ -60,24 +59,19 @@ export function FeedbackModal({ isOpen, onClose, onComplete }: FeedbackModalProp
 
   return (
     <>
-      {/* Backdrop - тільки в межах телефону */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity duration-300"
         onClick={step === 'thanks' ? handleThankYouClose : handleClose}
       />
 
-      {/* Modal */}
       {step === 'form' ? (
-        // Форма відгуку - піднімається знизу
         <div
           className={`absolute bottom-0 left-0 right-0 z-50 transition-transform duration-500 ease-out ${
             isOpen ? 'translate-y-0' : 'translate-y-full'
           }`}
         >
           <div className="bg-white rounded-t-3xl shadow-2xl overflow-hidden">
-            {/* Форма відгуку */}
             <div>
-              {/* Header */}
               <div className="bg-white px-6 pt-6 pb-4 border-b border-gray-200 flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-900">
                   Поділіться враженнями
@@ -91,12 +85,10 @@ export function FeedbackModal({ isOpen, onClose, onComplete }: FeedbackModalProp
               </div>
 
               <div className="px-6 py-4">
-                {/* Питання */}
                 <p className="text-gray-700 text-sm mb-5 leading-relaxed">
                   Задоволені формуванням запитом по Комунальним Проблемам в Diï?
                 </p>
 
-                {/* Емодзі */}
                 <div className="flex gap-3 justify-center mb-6">
                   {(['😠', '😐', '😕', '😁'] as Emoji[]).map((emoji) => (
                     <button
@@ -116,7 +108,6 @@ export function FeedbackModal({ isOpen, onClose, onComplete }: FeedbackModalProp
                   ))}
                 </div>
 
-                {/* Опції */}
                 <div className="mb-5">
                   <h3 className="text-gray-900 font-semibold text-sm mb-2">
                     Що сподобалось?
@@ -142,7 +133,6 @@ export function FeedbackModal({ isOpen, onClose, onComplete }: FeedbackModalProp
                   </div>
                 </div>
 
-                {/* Коментар */}
                 <div className="mb-5">
                   <h3 className="text-gray-900 font-semibold text-sm mb-2">
                     Як можна покращити послугу?
@@ -159,7 +149,6 @@ export function FeedbackModal({ isOpen, onClose, onComplete }: FeedbackModalProp
                   />
                 </div>
 
-                {/* Кнопка відправки */}
                 <button
                   onClick={handleSubmit}
                   disabled={!selectedEmoji}

@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Edit2, Square, ChevronRight, Mic } from 'lucide-react';
 import { Loader } from '@/components/Loader';
+import { ErrorModal } from '@/components/ErrorModal';
+import { useSolveProblem } from '@/api/hooks';
+import type { SolveProblemResponse } from '@/types/api';
 
 interface ProblemFormPageProps {
   onBack: () => void;
   mode?: 'home' | 'other';
   presetAddress?: string;
-  onSubmit: (problemText: string) => void;
+  onSubmit: (problemText: string, apiResponse: SolveProblemResponse) => void;
 }
 
 export function ProblemFormPage({
@@ -18,11 +21,13 @@ export function ProblemFormPage({
   const [problemText, setProblemText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const recognitionRef = useRef<any>(null);
   const finalTranscriptRef = useRef('');
   
-  // Адреси
+  const { mutate: solveProblem, isPending } = useSolveProblem();
+  
   const defaultAddress =
     'Україна, область Львівська, місто Львів, вулиця Володимира Великого 106, кв 54';
   const isHomeMode = mode === 'home';
@@ -30,15 +35,21 @@ export function ProblemFormPage({
   const displayAddress = isHomeMode
     ? defaultAddress
     : presetAddress || 'Обрана адреса';
-
-  // Ініціалізація Web Speech API
+  
+  const parseAddress = (fullAddress: string) => {
+    const parts = fullAddress.split(',').map(p => p.trim());
+    const city = parts.find(p => p.startsWith('м.'))?.replace('м.', '').trim() || 'Львів';
+    const street = parts[parts.length - 1] || fullAddress;
+    
+    return { city, address: street };
+  };
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'uk-UA'; // Українська мова
+      recognitionRef.current.lang = 'uk-UA';
 
       recognitionRef.current.onresult = (event: any) => {
         let interimTranscript = '';
@@ -46,14 +57,12 @@ export function ProblemFormPage({
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            // Додаємо фінальний текст до ref
             finalTranscriptRef.current += transcript + ' ';
           } else {
             interimTranscript = transcript;
           }
         }
 
-        // Відображаємо фінальний + проміжний текст
         const fullText = finalTranscriptRef.current + interimTranscript;
         setProblemText(fullText);
       };
@@ -86,35 +95,47 @@ export function ProblemFormPage({
       recognitionRef.current.stop();
       setIsRecording(false);
     } else {
-      // Зберігаємо поточний текст як базу
       finalTranscriptRef.current = problemText;
       recognitionRef.current.start();
       setIsRecording(true);
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (problemText.trim()) {
-      setIsSubmitting(true);
+      const { city, address } = parseAddress(displayAddress);
       
-      // Mock API call - затримка 2.5 секунди
-      await new Promise(resolve => setTimeout(resolve, 2500));
-      
-      setIsSubmitting(false);
-      onSubmit(problemText.trim());
+      solveProblem({
+        user_info: {
+          name: 'Василь Васильович Байдак',
+          address: address,
+          city: city,
+          phone: '+380123456789',
+        },
+        problem_text: problemText.trim(),
+      }, {
+        onSuccess: (data) => {
+          console.log('API відповідь:', data);
+          onSubmit(problemText.trim(), data);
+        },
+        onError: (error: any) => {
+          console.error('Помилка API:', error);
+          const errorMsg = error?.response?.data?.detail || 'Зачекайте та спробуйте ще раз.';
+          setErrorMessage(errorMsg);
+          setShowErrorModal(true);
+        },
+      });
     }
   };
 
   const isFormValid = problemText.trim().length > 0;
 
-  // Показуємо loader під час відправки
-  if (isSubmitting) {
+  if (isPending) {
     return <Loader />;
   }
 
   return (
     <div className="h-full flex flex-col bg-gray-100">
-      {/* Header */}
       <div className="pt-14 pb-4 px-6 bg-white">
         <div className="flex items-center gap-4">
           <button 
@@ -129,9 +150,7 @@ export function ProblemFormPage({
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex-1 px-6 py-6 overflow-y-auto pb-28">
-        {/* Блок з адресою */}
         <div className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
           <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
             {isHomeMode ? 'Місце проживання зазначено в банку:\n' : ''}
@@ -139,7 +158,6 @@ export function ProblemFormPage({
           </p>
         </div>
 
-        {/* Кнопка "Змінити" тільки для домашнього режиму */}
         {isHomeMode && (
           <button 
             onClick={() => setShowAddressModal(true)}
@@ -152,12 +170,10 @@ export function ProblemFormPage({
           </button>
         )}
 
-        {/* Заголовок форми */}
         <h2 className="text-gray-900 font-semibold text-base mb-3">
           Сформувати запит про проблему
         </h2>
 
-        {/* Текстове поле */}
         <div className="bg-white rounded-2xl shadow-sm relative">
           <textarea
             value={problemText}
@@ -168,7 +184,6 @@ export function ProblemFormPage({
             style={{ outline: 'none' }}
           />
           
-          {/* Waveform під час запису - меншій і прям внизу */}
           {isRecording && (
             <div className="absolute bottom-5 left-5 right-20 flex items-end gap-0.5 h-5">
               {Array.from({ length: 30 }).map((_, i) => (
@@ -185,7 +200,6 @@ export function ProblemFormPage({
             </div>
           )}
           
-          {/* Кнопка мікрофона / стоп - менша */}
           <button 
             className={`absolute bottom-4 right-4 w-10 h-10 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all ${
               isRecording ? 'bg-black animate-pulse' : 'bg-black'
@@ -201,7 +215,6 @@ export function ProblemFormPage({
         </div>
       </div>
 
-      {/* Кнопка "Сформувати Запит" - підняли на 5px */}
       <div className="absolute bottom-5 left-0 right-0 px-6 py-4 bg-gray-100">
         <button
           onClick={handleSubmit}
@@ -218,7 +231,6 @@ export function ProblemFormPage({
         </button>
       </div>
 
-      {/* Попап "Нова Адреса" */}
       {showAddressModal && isHomeMode && (
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-6">
           <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
@@ -226,7 +238,6 @@ export function ProblemFormPage({
               Нова Адреса
             </h2>
 
-            {/* Поле адреси (поки тільки для показу) */}
             <button className="w-full bg-gray-50 rounded-2xl px-5 py-4 mb-6 flex items-center justify-between text-left hover:bg-gray-100 transition-colors">
               <span className="text-gray-700 text-sm line-clamp-2">
                 {displayAddress}
@@ -234,18 +245,15 @@ export function ProblemFormPage({
               <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" strokeWidth={2} />
             </button>
 
-            {/* Кнопка "Зберегти" */}
             <button
               className="w-full bg-black text-white py-4 rounded-2xl font-semibold text-base mb-3 hover:scale-[1.02] active:scale-[0.98] transition-transform"
               onClick={() => {
                 setShowAddressModal(false);
-                // TODO: Зберегти нову адресу
               }}
             >
               Зберегти
             </button>
 
-            {/* Кнопка "Скасувати" */}
             <button
               className="w-full bg-white border-2 border-gray-900 text-gray-900 py-4 rounded-2xl font-semibold text-base hover:bg-gray-200 active:bg-gray-300 transition-colors"
               onClick={() => setShowAddressModal(false)}
@@ -255,6 +263,12 @@ export function ProblemFormPage({
           </div>
         </div>
       )}
+
+      <ErrorModal
+        isOpen={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        message={errorMessage}
+      />
     </div>
   );
 }

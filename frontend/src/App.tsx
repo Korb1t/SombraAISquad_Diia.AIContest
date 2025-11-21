@@ -6,13 +6,13 @@ import { ClassifierPage } from '@/pages/ClassifierPage';
 import { MapPage } from '@/pages/MapPage';
 import { ProblemFormPage } from '@/pages/ProblemFormPage';
 import { ResultPage } from '@/pages/ResultPage';
+import type { SolveProblemResponse } from '@/types/api';
 
-// Створюємо React Query клієнт
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1, // Повторити 1 раз при помилці
-      refetchOnWindowFocus: false, // Не оновлювати при фокусі вікна
+      retry: 1,
+      refetchOnWindowFocus: false,
     },
   },
 });
@@ -23,14 +23,12 @@ function App() {
   const [problemText, setProblemText] = useState('');
   const [formContext, setFormContext] = useState<'home' | 'other'>('home');
   const [otherAddressLabel, setOtherAddressLabel] = useState<string | null>(null);
+  const [apiResponse, setApiResponse] = useState<SolveProblemResponse | null>(null);
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Фон для мокапу - градієнт як у Diia */}
       <div className="min-h-screen bg-gradient-to-b from-blue-400 via-cyan-300 to-yellow-200 flex items-center justify-center p-4">
-        {/* iPhone мокап */}
         <PhoneMockup>
-          {/* Навігація між сторінками */}
           {currentPage === 'home' && (
             <HomePage onNavigateToClassifier={() => setCurrentPage('classifier')} />
           )}
@@ -42,7 +40,6 @@ function App() {
                 if (type === 'other') {
                   setCurrentPage('map');
                 } else {
-                  // "За місцем проживання" - одразу на форму з хардкодженою адресою
                   setFormContext('home');
                   setOtherAddressLabel(null);
                   setCurrentPage('form');
@@ -68,9 +65,11 @@ function App() {
               mode={formContext}
               presetAddress={formContext === 'other' ? otherAddressLabel ?? undefined : undefined}
               onBack={() => setCurrentPage(formContext === 'other' ? 'map' : 'classifier')}
-              onSubmit={(text) => {
+              onSubmit={(text, response) => {
                 setProblemText(text);
+                setApiResponse(response);
                 console.log('Опис проблеми:', text);
+                console.log('API відповідь:', response);
                 setCurrentPage('result');
               }}
             />
@@ -82,6 +81,7 @@ function App() {
               onBack={() => setCurrentPage('form')}
               onFinish={() => setCurrentPage('home')}
               problemText={problemText}
+              apiResponse={apiResponse}
             />
           )}
         </PhoneMockup>

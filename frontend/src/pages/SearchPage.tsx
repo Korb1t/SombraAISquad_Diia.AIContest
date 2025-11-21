@@ -26,7 +26,6 @@ export function SearchPage({ onBack, onSelect }: SearchPageProps) {
 
   return (
     <div className="h-full flex flex-col bg-gray-100">
-      {/* Header */}
       <div className="pt-14 pb-4 px-6 bg-white shadow-sm">
         <div className="flex items-center gap-4 mb-4">
           <button 
@@ -40,7 +39,6 @@ export function SearchPage({ onBack, onSelect }: SearchPageProps) {
           </h1>
         </div>
 
-        {/* Search Input */}
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" strokeWidth={2} />
           <input
@@ -54,7 +52,6 @@ export function SearchPage({ onBack, onSelect }: SearchPageProps) {
         </div>
       </div>
 
-      {/* Results List */}
       <div className="flex-1 px-4 py-4 overflow-y-auto">
         <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
           {filteredAddresses.map((address, index) => (

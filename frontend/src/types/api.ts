@@ -1,42 +1,47 @@
-/**
- * TypeScript типи для API
- * Синхронізовано з app/schemas/problems.py
- */
+export interface PersonalInfo {
+  name?: string | null;
+  address?: string | null;
+  city?: string | null;
+  phone?: string | null;
+}
 
-// Запит на класифікацію проблеми
-export interface ProblemRequest {
+export interface SolveProblemRequest {
+  user_info: PersonalInfo;
   problem_text: string;
-  user_name?: string | null;
-  user_address?: string | null;
-  user_phone?: string | null;
 }
 
-// Відповідь класифікатора
-export interface ProblemClassificationResponse {
-  category_id: string;
-  category_name: string;
-  category_description: string;
-  confidence: number; // 0.0-1.0
-  reasoning: string;
-  is_urgent: boolean;
-}
-
-// Інформація про сервіс
-export interface ServiceInfo {
-  service_name: string;
-  service_phone?: string | null;
-  service_email?: string | null;
-  service_address?: string | null;
-}
-
-// Повна відповідь (якщо буде endpoint з листом)
-export interface ProblemResponse {
+export interface ProblemClassification {
   category_id: string;
   category_name: string;
   confidence: number;
   is_urgent: boolean;
-  service: ServiceInfo;
-  letter_text: string;
+  category_description: string;
+  reasoning: string;
+}
+
+export interface ServiceInfo {
+  service_type: string;
+  service_name: string;
+  service_phone?: string | null;
+  service_email?: string | null;
+  service_website?: string | null;
+  service_address?: string | null;
+}
+
+export interface ServiceResponse {
+  category_id: string;
+  category_name: string;
+  confidence: number;
+  is_urgent: boolean;
+  service_info: ServiceInfo;
+  reasoning: string;
+}
+
+export interface SolveProblemResponse {
+  user_info: PersonalInfo;
+  classification: ProblemClassification;
+  service: ServiceResponse;
+  appeal_text: string;
 }
 
 

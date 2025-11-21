@@ -1,10 +1,5 @@
 import axios from 'axios';
-import type { ProblemRequest, ProblemClassificationResponse } from '@/types/api';
-
-/**
- * Axios клієнт для роботи з API
- * В dev режимі використовує Vite proxy (/api -> http://localhost:8000/api)
- */
+import type { SolveProblemRequest, SolveProblemResponse } from '@/types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
@@ -13,29 +8,20 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // 30 секунд (для LLM може бути довго)
+  timeout: 60000,
 });
 
-/**
- * API методи
- */
 export const api = {
-  /**
-   * Перевірка здоров'я сервера
-   */
   healthCheck: async (): Promise<boolean> => {
     const response = await apiClient.get<boolean>('/utils/health-check/');
     return response.data;
   },
 
-  /**
-   * Класифікація проблеми користувача
-   */
-  classifyProblem: async (
-    data: ProblemRequest
-  ): Promise<ProblemClassificationResponse> => {
-    const response = await apiClient.post<ProblemClassificationResponse>(
-      '/classify/',
+  solveProblem: async (
+    data: SolveProblemRequest
+  ): Promise<SolveProblemResponse> => {
+    const response = await apiClient.post<SolveProblemResponse>(
+      '/solve/',
       data
     );
     return response.data;

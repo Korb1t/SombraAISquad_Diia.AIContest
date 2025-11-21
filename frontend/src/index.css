@@ -2,10 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Leaflet styles */
 @import 'leaflet/dist/leaflet.css';
 
-/* Фікс для довгих слів без пробілів */
 @layer utilities {
   .overflow-wrap-anywhere {
     overflow-wrap: anywhere;
