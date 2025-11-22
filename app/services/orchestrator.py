@@ -89,9 +89,10 @@ class OrchestrationService:
         """
         Parse address string to extract street name and building number.
         Expected formats:
-        - "вулиця Лева, 42"
-        - "Leva street, 42"
-        - "вулиця Лева"
+        - "Володимира Великого, 106"
+        - "Малоголосківська, 42"
+        - "Васильківського С, 12"
+        - "Володимира Великого"
         
         Args:
             address: Address string from user
