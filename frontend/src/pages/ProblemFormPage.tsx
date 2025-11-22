@@ -42,7 +42,17 @@ export function ProblemFormPage({
     const parts = fullAddress.split(',').map(p => p.trim());
     const city = parts.find(p => p.startsWith('місто') || p.startsWith('м.'))?.replace(/місто |м\./g, '').trim() || 'Львів';
     // Find street part - contains "вулиця" keyword
-    const streetPart = parts.find(p => p.includes('вулиця'));
+    let streetPart = parts.find(p => p.includes('вулиця'));
+    
+    if (streetPart) {
+      // Normalize to "<street_name>, <street_number>"
+      // Match: "вулиця Шевченка 10", "вулиця Шевченка,10", "вулиця Шевченка, 10", etc.
+      const match = streetPart.match(/^(вулиця\s+[^\d,]+)[, ]*\s*(\d.*)$/);
+      if (match) {
+        streetPart = `${match[1].trim()}, ${match[2].trim()}`;
+      }
+    }
+
     const address = streetPart || fullAddress;
     
     // Extract apartment number from address (look for "кв XX" or "квартира XX")
