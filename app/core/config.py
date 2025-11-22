@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     # CodeMie configuration
     CODEMIE_API_KEY: str
     CODEMIE_API_BASE: str = "https://codemie.lab.epam.com/llms"
-    CODEMIE_LLM_MODEL: str = "gpt-5-mini-2025-08-07"
+    CODEMIE_LLM_MODEL: str = "gpt-4.1-mini"
     CODEMIE_EMBEDDING_MODEL: str = "codemie-text-embedding-ada-002"
     CODEMIE_TRANSCRIPTION_MODEL: str = "gemini-2.5-flash"
 
