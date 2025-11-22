@@ -19,7 +19,6 @@ Test Statistics:
 - Bug fix validation
 """
 
-import json
 import pytest
 import asyncio
 from httpx import AsyncClient
