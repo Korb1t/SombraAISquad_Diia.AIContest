@@ -45,7 +45,11 @@ export function ProblemFormPage({
     const streetPart = parts.find(p => p.includes('вулиця'));
     const address = streetPart || fullAddress;
     
-    return { city, address };
+    // Extract apartment number from address (look for "кв XX" or "квартира XX")
+    const apartmentMatch = fullAddress.match(/(?:кв\.?|квартира)\s*(\d+)/i);
+    const apartment = apartmentMatch ? apartmentMatch[1] : '';
+    
+    return { city, address, apartment };
   };
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -107,7 +111,7 @@ export function ProblemFormPage({
 
   const handleSubmit = () => {
     if (problemText.trim()) {
-      const { city, address } = parseAddress(displayAddress);
+      const { city, address, apartment } = parseAddress(displayAddress);
       
       solveProblem({
         user_info: {
@@ -115,6 +119,7 @@ export function ProblemFormPage({
           address: address,
           city: city,
           phone: '+380123456789',
+          apartment: apartment,
         },
         problem_text: problemText.trim(),
       }, {

@@ -6,6 +6,16 @@ from app.llm.prompts import APPEAL_TEMPLATE
 from app.llm.client import SimpleLLM
 
 
+def extract_apartment_from_text(text: str) -> str:
+    """
+    Extract apartment number from text (problem description or address).
+    Looks for patterns like 'кв 54', 'квартира 54', 'кв. 54'
+    """
+    import re
+    match = re.search(r'(?:кв\.?|квартира)\s*(\d+)', text, re.IGNORECASE)
+    return match.group(1) if match else ""
+
+
 def format_appeal_prompt(request: AppealRequest) -> str:
     """
     Format appeal generation prompt from request data.
@@ -16,10 +26,15 @@ def format_appeal_prompt(request: AppealRequest) -> str:
     Returns:
         Formatted prompt for LLM
     """
+    # Extract apartment - it should already be in request.apartment if extracted earlier
+    # Otherwise try to extract from problem_text as fallback
+    apartment = request.apartment or extract_apartment_from_text(request.problem_text)
+    
     return APPEAL_TEMPLATE.format(
         problem_text=request.problem_text,
         street=request.address,
-        building=request.building
+        building=request.building,
+        apartment=apartment
     )
 
 

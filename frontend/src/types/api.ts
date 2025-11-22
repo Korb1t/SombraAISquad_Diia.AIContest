@@ -3,6 +3,7 @@ export interface PersonalInfo {
   address?: string | null;
   city?: string | null;
   phone?: string | null;
+  apartment?: string | null;
 }
 
 export interface SolveProblemRequest {

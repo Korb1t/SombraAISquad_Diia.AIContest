@@ -8,6 +8,7 @@ INPUT DATA:
 - Problem description (informal): {problem_text}
 - Street: {street}
 - Building: {building}
+- Apartment: {apartment}
 
 REQUIREMENTS:
 1. Rephrase the problem description into formal, official Ukrainian language if needed
@@ -20,17 +21,17 @@ EXAMPLE:
 Input: "в під'їзді лампочка не горить вже тиждень"
 Street: "вулиця Володимира Великого"
 Building: "106"
+Apartment: "54"
 
 Output:
 Доброго дня!
-Прошу звернути увагу, що в під'їзді, по вулиці Володимира Великого 106, вже протягом тижня не працює (не горить) лампочка.
+Прошу звернути увагу, що в під'їзді по вулиці Володимира Великого 106, квартира 54, вже протягом тижня не працює освітлення.
 Просимо організувати ремонт або заміну для відновлення освітлення.
 Дякую!
 
 TEMPLATE STRUCTURE:
 Доброго дня!
-
-[Reformulate problem_text into formal style and naturally incorporate the address (street, building) into the problem description. Do NOT add address as a separate field.]
+[Reformulate problem_text into formal style and naturally incorporate the full address (street, building, and apartment if provided) into the problem description. Format apartment as "квартира {apartment}" when present. Do NOT add address as a separate field.]
 
 Просимо організувати ремонт або заміну для вирішення проблеми.
 

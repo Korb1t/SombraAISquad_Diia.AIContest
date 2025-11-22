@@ -65,7 +65,8 @@ class OrchestrationService:
         appeal_request = AppealRequest(
             problem_text=request.problem_text,
             address=street_name,
-            building=building_number
+            building=building_number,
+            apartment=request.user_info.apartment or ""
         )
         appeal_text = await generate_appeal_text(appeal_request)
         
