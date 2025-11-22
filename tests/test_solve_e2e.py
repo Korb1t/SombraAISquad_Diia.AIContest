@@ -63,7 +63,7 @@ class TestSolveEndpointValid:
                 "address": "вул. Львівська, 10",
                 "city": "Львів"
             },
-            "problem_text": "У підіззді вже тиждень не горить лампочка на сходах"
+            "problem_text": "У підʼїзді вже тиждень не горить лампочка на сходах"
         }
         
         response = await async_client.post(SOLVE_ENDPOINT, json=request_data)
