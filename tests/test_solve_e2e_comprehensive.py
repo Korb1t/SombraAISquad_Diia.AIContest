@@ -22,7 +22,6 @@ Test Statistics:
 import json
 import pytest
 import asyncio
-from pathlib import Path
 from httpx import AsyncClient
 
 from app.main import app
