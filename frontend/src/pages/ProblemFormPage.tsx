@@ -40,10 +40,22 @@ export function ProblemFormPage({
   
   const parseAddress = (fullAddress: string) => {
     const parts = fullAddress.split(',').map(p => p.trim());
-    const city = parts.find(p => p.startsWith('місто') || p.startsWith('м.'))?.replace(/місто |м\./g, '').trim() || 'Львів';
     
-    // Find street part - contains "вулиця" keyword
-    const streetIndex = parts.findIndex(p => p.includes('вулиця'));
+    const isCity = (p: string) => p.toLowerCase().startsWith('місто') || p.toLowerCase().startsWith('м.');
+    const isRegion = (p: string) => p.toLowerCase().includes('область');
+    const isCountry = (p: string) => p.toLowerCase() === 'україна';
+    const isApartment = (p: string) => /^(кв\.?|квартира)\s*\d+/i.test(p);
+    const isStreetExplicit = (p: string) => p.toLowerCase().includes('вулиця') || p.toLowerCase().includes('вул.');
+
+    const cityPart = parts.find(isCity);
+    const city = cityPart?.replace(/місто |м\./gi, '').trim() || 'Львів';
+    
+    // Find street part - either explicit or by elimination
+    let streetIndex = parts.findIndex(isStreetExplicit);
+    if (streetIndex === -1) {
+      streetIndex = parts.findIndex(p => !isCity(p) && !isRegion(p) && !isCountry(p) && !isApartment(p));
+    }
+
     let streetPart = streetIndex !== -1 ? parts[streetIndex] : undefined;
     
     if (streetPart) {
@@ -51,7 +63,7 @@ export function ProblemFormPage({
       if (streetIndex + 1 < parts.length) {
         const nextPart = parts[streetIndex + 1];
         // If next part starts with a digit and doesn't look like apartment info
-        if (/^\d/.test(nextPart) && !nextPart.toLowerCase().includes('кв')) {
+        if (/^\d/.test(nextPart) && !isApartment(nextPart)) {
           streetPart = `${streetPart}, ${nextPart}`;
         }
       }
