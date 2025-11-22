@@ -30,7 +30,7 @@ export function ProblemFormPage({
   const { mutate: solveProblem, isPending } = useSolveProblem();
   
   const defaultAddress =
-    'Україна, область Львівська, місто Львів, вулиця Володимира Великого 106, кв 54';
+    'Україна, область Львівська, місто Львів, вулиця Аральська 8, кв 2';
   const [currentAddress, setCurrentAddress] = useState(defaultAddress);
   const isHomeMode = mode === 'home';
   const headerTitle = isHomeMode ? 'За місцем проживання' : 'Інша Адреса';
@@ -41,15 +41,30 @@ export function ProblemFormPage({
   const parseAddress = (fullAddress: string) => {
     const parts = fullAddress.split(',').map(p => p.trim());
     const city = parts.find(p => p.startsWith('місто') || p.startsWith('м.'))?.replace(/місто |м\./g, '').trim() || 'Львів';
+    
     // Find street part - contains "вулиця" keyword
-    let streetPart = parts.find(p => p.includes('вулиця'));
+    const streetIndex = parts.findIndex(p => p.includes('вулиця'));
+    let streetPart = streetIndex !== -1 ? parts[streetIndex] : undefined;
     
     if (streetPart) {
-      // Normalize to "<street_name>, <street_number>"
-      // Match: "вулиця Шевченка 10", "вулиця Шевченка,10", "вулиця Шевченка, 10", etc.
-      const match = streetPart.match(/^(вулиця\s+[^\d,]+)[, ]*\s*(\d.*)$/);
+      // Check if the next part is the street number (e.g. "вулиця Аральська, 8")
+      if (streetIndex + 1 < parts.length) {
+        const nextPart = parts[streetIndex + 1];
+        // If next part starts with a digit and doesn't look like apartment info
+        if (/^\d/.test(nextPart) && !nextPart.toLowerCase().includes('кв')) {
+          streetPart = `${streetPart}, ${nextPart}`;
+        }
+      }
+
+      // Ensure format <street_name>, <street_number> if number is in the same string
+      // e.g. "вулиця Аральська 8" -> "вулиця Аральська, 8"
+      const match = streetPart.match(/^(.*?)(\s+\d+\S*)$/);
       if (match) {
-        streetPart = `${match[1].trim()}, ${match[2].trim()}`;
+        const prefix = match[1].trim();
+        const number = match[2].trim();
+        if (!prefix.endsWith(',')) {
+          streetPart = `${prefix}, ${number}`;
+        }
       }
     }
 
