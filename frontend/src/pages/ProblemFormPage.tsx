@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Edit2, Square, ChevronRight, Mic } from 'lucide-react';
+import { ArrowLeft, Edit2, Square, Mic } from 'lucide-react';
 import { Loader } from '@/components/Loader';
 import { ErrorModal } from '@/components/ErrorModal';
 import { useSolveProblem } from '@/api/hooks';
