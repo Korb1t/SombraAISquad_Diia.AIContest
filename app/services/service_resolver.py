@@ -6,10 +6,13 @@ from app.schemas.services import ServiceResponse, ServiceInfo
 
 # TODO: Move category definitions out
 # Definition of categories we consider "district-level"
-RA_CATEGORIES = ["roads", "trees", "yard", "infrastructure"]
+RA_CATEGORIES = ["roads", "trees", "yard", "parking"]
 
 # Definition of categories handled by "citywide monopolists" (global responsibility)
-CITYWIDE_MONOPOLISTS_CATEGORIES = ["water_supply", "heating", "gas", "lighting"]
+CITYWIDE_MONOPOLISTS_CATEGORIES = ["water_supply", "heating", "gas", "lighting", "animals"]
+
+# This is not used, but for display what other categories exist
+BUILDING_LEVEL_CATEGORIES = ["sewage", "elevator", "cleaning", "roof", "entrance_doors", "noise"]
 
 # Names of district administrations for validation, since they are tied to citywide
 RA_SERVICE_TYPES = ["РА"]
@@ -62,7 +65,7 @@ class ServiceRouter:
         
         if hotline:
             if is_urgent:
-                reasoning = "Не було знайдено спеціальну аварійну службу для цієї проблеми. Звернення перенаправлено на Міську гарячу лінію 1580 для ручної диспетчеризації."
+                reasoning = "Для надання термінової допомоги, звертайтесь на Міську гарячу лінію 1580 для ручної диспетчеризації."
             else:
                 reasoning = "Проблема не була ідентифікована жодним спеціалізованим виконавцем. Звернення перенаправлено на Міську гарячу лінію 1580 для ручної диспетчеризації."
         
@@ -138,14 +141,13 @@ class ServiceRouter:
             return self._get_hotline_fallback(category_id=category_id, category_name=category_name, is_urgent=True)
 
         # --- 2. BUILDING-LEVEL RESPONSIBILITY (OSBB/LKP) ---
-        if category_id not in RA_CATEGORIES and building_id is not None:
+        if category_id not in RA_CATEGORIES and category_id not in CITYWIDE_MONOPOLISTS_CATEGORIES and building_id is not None:
             
             # Search for assignment by specific building (highest specificity)
             specific_stmt = (
                 select(Service, ServiceAssignment, Category)
                 .join(ServiceAssignment, Service.service_id == ServiceAssignment.service_id)
                 .join(Category, Category.id == ServiceAssignment.category_id)
-                .where(ServiceAssignment.category_id == category_id)
                 .where(ServiceAssignment.building_id == building_id)
                 .where(ServiceAssignment.is_primary)
                 .where(Service.type.in_(['ОСББ', 'ЛКП/УК']))
