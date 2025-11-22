@@ -783,7 +783,7 @@ class TestBugFixes:
             "problem_text": "Ліфт застряг між поверхами, люди всередині!"
         })
         data = response.json()
-        assert data["classification"]["is_urgent"] or "застряг" in "Ліфт застряг між поверхами, люди всередині!"
+        assert data["classification"]["is_urgent"]
     
     @pytest.mark.asyncio
     async def test_building_routing(self, async_client: AsyncClient):
