@@ -66,6 +66,9 @@ export function ProblemFormPage({
           streetPart = `${prefix}, ${number}`;
         }
       }
+
+      // Remove "вулиця" prefix to return only "Street, Number"
+      streetPart = streetPart.replace(/^(вулиця|вул\.)\s*/i, '');
     }
 
     const address = streetPart || fullAddress;
