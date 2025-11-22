@@ -35,7 +35,6 @@ Run with: uv run pytest tests/test_solve_e2e_all.py -v
 
 import pytest
 import asyncio
-from typing import Dict, Any, List
 from httpx import AsyncClient
 
 from app.main import app
