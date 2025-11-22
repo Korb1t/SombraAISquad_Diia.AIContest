@@ -44,11 +44,12 @@ export function ProblemFormPage({
     // Find street part - contains "вулиця" keyword
     let streetPart = parts.find(p => p.includes('вулиця'));
     
-    if (streetPart && !streetPart.includes(',')) {
-      // Ensure format <street_name>, <street_number>
-      const match = streetPart.match(/^(.+?)\s+(\d+\S*)$/);
+    if (streetPart) {
+      // Normalize to "<street_name>, <street_number>"
+      // Match: "вулиця Шевченка 10", "вулиця Шевченка,10", "вулиця Шевченка, 10", etc.
+      const match = streetPart.match(/^(вулиця\s+[^\d,]+)[, ]*\s*(\d.*)$/);
       if (match) {
-        streetPart = `${match[1]}, ${match[2]}`;
+        streetPart = `${match[1].trim()}, ${match[2].trim()}`;
       }
     }
 
