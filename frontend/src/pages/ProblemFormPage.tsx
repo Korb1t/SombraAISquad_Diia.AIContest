@@ -46,7 +46,7 @@ export function ProblemFormPage({
     
     if (streetPart && !streetPart.includes(',')) {
       // Ensure format <street_name>, <street_number>
-      const match = streetPart.match(/^(.*?)\s+(\d.*)$/);
+      const match = streetPart.match(/^(.+?)\s+(\d+\S*)$/);
       if (match) {
         streetPart = `${match[1]}, ${match[2]}`;
       }
