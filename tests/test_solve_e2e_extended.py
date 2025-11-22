@@ -16,7 +16,6 @@ Test Statistics:
 - Performance benchmarks
 """
 
-import json
 import pytest
 from pathlib import Path
 from httpx import AsyncClient
