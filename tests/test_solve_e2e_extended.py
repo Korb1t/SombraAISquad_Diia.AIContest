@@ -591,7 +591,7 @@ class TestBugFixes:
                 "address": "вул. Вхідна, 1",
                 "city": "Львів"
             },
-            "problem_text": "Входові дверцята у підіззі розбиті"
+            "problem_text": "Входові дверцята у підʼїзді розбиті"
         })
         
         assert response.status_code == 200
