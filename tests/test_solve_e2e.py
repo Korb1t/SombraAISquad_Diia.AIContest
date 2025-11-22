@@ -60,7 +60,7 @@ class TestSolveEndpointValid:
             "user_info": {
                 "name": "Іван Петренко",
                 "phone": "0501234567",
-                "address": "вул. Лвіська, 10",
+                "address": "вул. Львівська, 10",
                 "city": "Львів"
             },
             "problem_text": "У підіззді вже тиждень не горить лампочка на сходах"
