@@ -324,7 +324,6 @@ class TestDatasetGenerator:
 
 
 if __name__ == "__main__":
-    import sys
     
     full_dataset = "app/data/full_dataset.json"
     output_dir = "tests/fixtures/test_datasets"
