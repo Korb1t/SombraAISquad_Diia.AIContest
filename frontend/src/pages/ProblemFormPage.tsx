@@ -30,7 +30,7 @@ export function ProblemFormPage({
   const { mutate: solveProblem, isPending } = useSolveProblem();
   
   const defaultAddress =
-    'Україна, область Львівська, місто Львів, вулиця Аральська 8, кв 2';
+    'Аральська, 8';
   const [currentAddress, setCurrentAddress] = useState(defaultAddress);
   const isHomeMode = mode === 'home';
   const headerTitle = isHomeMode ? 'За місцем проживання' : 'Інша Адреса';
