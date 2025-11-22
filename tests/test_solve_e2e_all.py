@@ -33,7 +33,6 @@ Expected Results:
 Run with: uv run pytest tests/test_solve_e2e_all.py -v
 """
 
-import json
 import pytest
 import asyncio
 from pathlib import Path
