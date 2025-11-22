@@ -10,7 +10,6 @@ Ensure that:
 
 import asyncio
 import sys
-import os
 from pathlib import Path
 import pytest
 from typing import Generator
