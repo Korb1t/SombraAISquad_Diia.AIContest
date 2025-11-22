@@ -23,6 +23,7 @@ export function ProblemFormPage({
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [editedAddress, setEditedAddress] = useState('');
   const recognitionRef = useRef<any>(null);
   const finalTranscriptRef = useRef('');
   
@@ -30,18 +31,21 @@ export function ProblemFormPage({
   
   const defaultAddress =
     'Україна, область Львівська, місто Львів, вулиця Володимира Великого 106, кв 54';
+  const [currentAddress, setCurrentAddress] = useState(defaultAddress);
   const isHomeMode = mode === 'home';
   const headerTitle = isHomeMode ? 'За місцем проживання' : 'Інша Адреса';
   const displayAddress = isHomeMode
-    ? defaultAddress
+    ? currentAddress
     : presetAddress || 'Обрана адреса';
   
   const parseAddress = (fullAddress: string) => {
     const parts = fullAddress.split(',').map(p => p.trim());
-    const city = parts.find(p => p.startsWith('м.'))?.replace('м.', '').trim() || 'Львів';
-    const street = parts[parts.length - 1] || fullAddress;
+    const city = parts.find(p => p.startsWith('місто') || p.startsWith('м.'))?.replace(/місто |м\./g, '').trim() || 'Львів';
+    // Find street part - contains "вулиця" keyword
+    const streetPart = parts.find(p => p.includes('вулиця'));
+    const address = streetPart || fullAddress;
     
-    return { city, address: street };
+    return { city, address };
   };
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -172,7 +176,10 @@ export function ProblemFormPage({
 
         {isHomeMode && (
           <button 
-            onClick={() => setShowAddressModal(true)}
+            onClick={() => {
+              setEditedAddress(currentAddress);
+              setShowAddressModal(true);
+            }}
             className="w-full bg-gray-100 border-2 border-gray-300 rounded-2xl px-5 py-4 mb-8 flex items-center justify-center gap-2 hover:bg-gray-200 hover:border-gray-400 transition-colors"
           >
             <Edit2 className="w-5 h-5 text-gray-700" strokeWidth={2} />
@@ -250,17 +257,23 @@ export function ProblemFormPage({
               Нова Адреса
             </h2>
 
-            <button className="w-full bg-gray-50 rounded-2xl px-5 py-4 mb-6 flex items-center justify-between text-left hover:bg-gray-100 transition-colors">
-              <span className="text-gray-700 text-sm line-clamp-2">
-                {displayAddress}
-              </span>
-              <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" strokeWidth={2} />
-            </button>
+            <textarea
+              value={editedAddress}
+              onChange={(e) => setEditedAddress(e.target.value)}
+              placeholder="Введіть адресу"
+              className="w-full bg-gray-50 rounded-2xl px-5 py-4 mb-6 text-gray-700 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-colors"
+              rows={4}
+              style={{ outline: 'none' }}
+            />
 
             <button
-              className="w-full bg-black text-white py-4 rounded-2xl font-semibold text-base mb-3 hover:scale-[1.02] active:scale-[0.98] transition-transform"
+              className="w-full bg-black text-white py-4 rounded-2xl font-semibold text-base mb-3 hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:bg-gray-300 disabled:cursor-not-allowed"
+              disabled={!editedAddress.trim()}
               onClick={() => {
-                setShowAddressModal(false);
+                if (editedAddress.trim()) {
+                  setCurrentAddress(editedAddress.trim());
+                  setShowAddressModal(false);
+                }
               }}
             >
               Зберегти
@@ -268,7 +281,10 @@ export function ProblemFormPage({
 
             <button
               className="w-full bg-white border-2 border-gray-900 text-gray-900 py-4 rounded-2xl font-semibold text-base hover:bg-gray-200 active:bg-gray-300 transition-colors"
-              onClick={() => setShowAddressModal(false)}
+              onClick={() => {
+                setEditedAddress(currentAddress);
+                setShowAddressModal(false);
+              }}
             >
               Скасувати
             </button>

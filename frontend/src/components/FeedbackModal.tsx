@@ -151,12 +151,7 @@ export function FeedbackModal({ isOpen, onClose, onComplete }: FeedbackModalProp
 
                 <button
                   onClick={handleSubmit}
-                  disabled={!selectedEmoji}
-                  className={`w-full py-4 rounded-2xl font-semibold text-base transition-all ${
-                    selectedEmoji
-                      ? 'bg-black text-white hover:scale-[1.02] active:scale-[0.98]'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  }`}
+                  className="w-full py-4 rounded-2xl font-semibold text-base transition-all bg-black text-white hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Надіслати відгук
                 </button>
