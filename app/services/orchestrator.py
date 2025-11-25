@@ -67,9 +67,7 @@ class OrchestrationService:
         # Step 3: Generate appeal text
         appeal_request = AppealRequest(
             problem_text=request.problem_text,
-            address=street_name,
-            building=building_number,
-            apartment=request.user_info.apartment or ""
+            address=request.user_info.address
         )
         appeal_text = await generate_appeal_text(appeal_request)
         
@@ -77,8 +75,7 @@ class OrchestrationService:
         user_info = PersonalInfo(
             name=request.user_info.name,
             address=request.user_info.address,
-            phone=request.user_info.phone,
-            city=request.user_info.city
+            phone=request.user_info.phone
         )
         
         return OrchestrationResponse(

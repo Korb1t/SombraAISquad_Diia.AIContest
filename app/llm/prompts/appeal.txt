@@ -6,9 +6,7 @@ Your task: take the informal problem description and create a formal appeal lett
 
 INPUT DATA:
 - Problem description (informal): {problem_text}
-- Street: {street}
-- Building: {building}
-- Apartment: {apartment}
+- Address: {address}
 
 REQUIREMENTS:
 1. Rephrase the problem description into formal, official Ukrainian language if needed
@@ -19,9 +17,7 @@ REQUIREMENTS:
 
 EXAMPLE:
 Input: "в під'їзді лампочка не горить вже тиждень"
-Street: "вулиця Володимира Великого"
-Building: "106"
-Apartment: "54"
+Address: "Україна, область Львівська, місто Львів, вулиця Володимира Великого 106, кв 54"
 
 Output:
 Доброго дня!
@@ -31,7 +27,7 @@ Output:
 
 TEMPLATE STRUCTURE:
 Доброго дня!
-[Reformulate problem_text into formal style and naturally incorporate the full address (street, building, and apartment if provided) into the problem description. Format apartment as "квартира {apartment}" when present. Do NOT add address as a separate field.]
+[Reformulate problem_text into formal style and naturally incorporate the address (street, building, and apartment if provided) into the problem description. Do NOT add address as a separate field.]
 
 Просимо організувати ремонт або заміну для вирішення проблеми.
 
