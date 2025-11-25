@@ -1,5 +1,9 @@
-from typing import Optional
+import re
+from typing import Optional, List
+
+from sqlalchemy import func, or_
 from sqlmodel import Session, select
+
 from app.db_models import Category
 from app.db_models import Service, Building, ServiceAssignment
 from app.schemas.services import ServiceResponse, ServiceInfo
@@ -26,15 +30,65 @@ class ServiceRouter:
     def __init__(self, session: Session):
         self.session = session
         
+    @staticmethod
+    def _normalize_house_number(number: Optional[str]) -> str:
+        if not number:
+            return ""
+        return number.strip().lower().replace(" ", "")
+
+    @staticmethod
+    def _digits_only(number: str) -> str:
+        return "".join(ch for ch in number if ch.isdigit())
+
+    @staticmethod
+    def _normalize_street(name: str) -> str:
+        cleaned = name.lower()
+        cleaned = re.sub(r"[.,]", " ", cleaned)
+        cleaned = re.sub(r"\s+", " ", cleaned).strip()
+        return cleaned
+
+    @staticmethod
+    def _street_tokens(name: str) -> List[str]:
+        stopwords = {"україна", "львів", "місто", "м", "область", "обл", "район", "р-н"}
+        words = [w for w in ServiceRouter._normalize_street(name).split() if w not in stopwords]
+        return [w for w in words if len(w) > 2]
+
     def _find_building(self, street_name: str, house_number: str, city: str = "Львів") -> Optional[Building]:
-        """Searches for Building ID by address."""
-        stmt = (
-            select(Building)
-            .where(Building.city == city)
-            .where(Building.street_name == street_name)
-            .where(Building.house_number == house_number)
-        )
-        return self.session.exec(stmt).first()
+        """Fuzzy search for building by address."""
+        street_tokens = self._street_tokens(street_name)
+        normalized_house = self._normalize_house_number(house_number)
+        house_variants = {normalized_house} if normalized_house else set()
+        digits_variant = self._digits_only(normalized_house)
+        if digits_variant and digits_variant != normalized_house:
+            house_variants.add(digits_variant)
+
+        stmt = select(Building).where(Building.city == city)
+
+        if street_tokens:
+            like_filters = [
+                func.lower(Building.street_name).like(f"%{token}%")
+                for token in street_tokens[:2]
+            ]
+            stmt = stmt.where(or_(*like_filters))
+        else:
+            stmt = stmt.where(func.lower(Building.street_name).like(f"%{self._normalize_street(street_name)}%"))
+
+        candidates = self.session.exec(stmt).all()
+        if not candidates:
+            return None
+
+        def matches(building: Building) -> bool:
+            normalized_existing = self._normalize_house_number(building.house_number)
+            if normalized_existing in house_variants:
+                return True
+            digits_existing = self._digits_only(normalized_existing)
+            return digits_existing and digits_variant and digits_existing == digits_variant
+
+        for candidate in candidates:
+            if matches(candidate):
+                return candidate
+
+        return candidates[0]
 
     def _format_response(
         self, service: Service, confidence: float, reasoning: str,
