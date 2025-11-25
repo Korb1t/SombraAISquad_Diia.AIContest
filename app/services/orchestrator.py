@@ -5,6 +5,9 @@ Orchestrator service that coordinates the flow:
 3. Generate appeal -> create letter text
 4. Return complete solution
 """
+import re
+from typing import Dict
+
 from sqlmodel import Session
 from app.schemas.orchestration import OrchestrationRequest, OrchestrationResponse
 from app.schemas.base import PersonalInfo
@@ -64,9 +67,7 @@ class OrchestrationService:
         # Step 3: Generate appeal text
         appeal_request = AppealRequest(
             problem_text=request.problem_text,
-            address=street_name,
-            building=building_number,
-            apartment=request.user_info.apartment or ""
+            address=request.user_info.address
         )
         appeal_text = await generate_appeal_text(appeal_request)
         
@@ -74,8 +75,7 @@ class OrchestrationService:
         user_info = PersonalInfo(
             name=request.user_info.name,
             address=request.user_info.address,
-            phone=request.user_info.phone,
-            city=request.user_info.city
+            phone=request.user_info.phone
         )
         
         return OrchestrationResponse(
@@ -86,35 +86,89 @@ class OrchestrationService:
         )
     
     @staticmethod
-    def _parse_address(address: str) -> dict:
+    def _parse_address(address: str) -> Dict[str, str]:
         """
-        Parse address string to extract street name and building number.
-        Expected formats:
-        - "Володимира Великого, 106"
-        - "Малоголосківська, 42"
-        - "Васильківського С, 12"
-        - "Володимира Великого"
+        Parse a free-form Ukrainian address and extract street & house number.
         
-        Args:
-            address: Address string from user
-            
-        Returns:
-            Dict with "street" and "building" keys
+        Handles inputs like:
+        - "Україна, область Львівська, місто Львів, вулиця Володимира Великого 10б, кв 54"
+        - "Львів, проспект Червоної Калини 36"
+        - "Стрийська, 45"
         """
-        # Try to split by comma
-        if "," in address:
-            parts = [p.strip() for p in address.split(",")]
-            street = parts[0]
-            # Try to extract building number from the second part
-            building = parts[1] if len(parts) > 1 else ""
-            # Extract only the number from building string if it contains text
-            building = ''.join(c for c in (building.split()[0] if building.split() else building) if c.isdigit()) or building
-        else:
-            # No comma, use whole string as street
-            street = address.strip()
-            building = ""
-        
+        if not address:
+            return {"street": "", "building": ""}
+
+        cleaned = address.replace("\n", " ")
+        parts = [p.strip() for p in re.split(r"[;,]", cleaned) if p.strip()]
+
+        street_segment = ""
+        house_number = ""
+
+        street_keywords = [
+            "вулиця",
+            "вул",
+            "улица",
+            "проспект",
+            "просп",
+            "площа",
+            "пл",
+            "бульвар",
+            "бул",
+            "провулок",
+            "пров",
+            "въезд",
+            "street",
+        ]
+        house_pattern = re.compile(r"\b(\d+\s*[а-яА-Яa-zA-Z]?)\b")
+
+        apartment_tokens = {"кв", "квартира", "apt", "apartment"}
+
+        for idx in range(len(parts) - 1, -1, -1):
+            segment = parts[idx]
+            lower_segment = segment.lower()
+            if any(token in lower_segment.split() for token in apartment_tokens):
+                continue
+
+            match = house_pattern.search(segment)
+            if match:
+                house_number = match.group(1).replace(" ", "")
+                prefix = segment[: match.start()].strip()
+                if prefix:
+                    street_segment = prefix
+                elif idx > 0:
+                    street_segment = parts[idx - 1]
+                else:
+                    street_segment = segment
+                break
+
+        if not street_segment and parts:
+            street_segment = parts[-1]
+
+        street = OrchestrationService._cleanup_street_name(street_segment, street_keywords)
+
         return {
-            "street": street if street else address,
-            "building": building if building else ""
+            "street": street,
+            "building": house_number,
         }
+
+    @staticmethod
+    def _cleanup_street_name(segment: str, keywords: list[str]) -> str:
+        """Remove country/city prefixes and street keywords."""
+        if not segment:
+            return ""
+
+        lowered = segment.lower()
+        removal_tokens = ["україна", "область", "район", "місто", "м.", "обл.", "р-н"]
+        for token in removal_tokens:
+            if lowered.startswith(token):
+                segment = segment[len(token) :].strip(", .")
+                lowered = segment.lower()
+
+        for keyword in keywords:
+            pattern = re.compile(rf"\b{keyword}\.?\b", re.IGNORECASE)
+            if pattern.search(segment):
+                segment = pattern.sub("", segment).strip()
+                break
+
+        segment = re.sub(r"\s+", " ", segment)
+        return segment.strip()
