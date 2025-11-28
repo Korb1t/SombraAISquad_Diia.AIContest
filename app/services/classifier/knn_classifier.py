@@ -132,7 +132,7 @@ class KNNClassifier(BaseClassifier):
         vote_component_cat = count_cat / len(neighbors_category)
         confidence_cat = self._blend_confidence(vote_component_cat, distance_component_cat)
 
-        # 2. FIND NEIGHBORS FOR URGENCY (Use only 2000 tagged)
+        # 2. FIND NEIGHBORS FOR URGENCY
         neighbors_urgency = self._get_nearest_neighbors(
             query_embedding, 
             k_neighbors
