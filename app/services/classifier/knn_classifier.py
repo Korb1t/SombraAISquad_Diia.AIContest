@@ -173,7 +173,11 @@ class KNNClassifier(BaseClassifier):
         distance_component_urgency, closest_winner_urgency, closest_competitor_urgency = self._distance_confidence(
             urgent_winner_distances, urgent_competitor_distances
         )
-        vote_component_urgency = urgent_votes / len(neighbors_urgency)
+        vote_component_urgency = (
+            urgent_votes / len(neighbors_urgency)
+            if is_urgent_result
+            else (len(neighbors_urgency) - urgent_votes) / len(neighbors_urgency)
+        )
         confidence_urgent = self._blend_confidence(
             vote_component_urgency, distance_component_urgency
         )
