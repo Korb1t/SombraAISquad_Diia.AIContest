@@ -123,7 +123,7 @@ class LLMClassifier(BaseClassifier):
         1. Urgency detection via LLM
         2. Category classification via RAG + few-shot learning
         """
-        # Classify category, check relevance and urgency in one call
+        # Classify category and check urgency in one call
         category_id, confidence, reasoning, is_urgent = self.classify(problem_text)
         category = self.get_category_info(category_id)
         
