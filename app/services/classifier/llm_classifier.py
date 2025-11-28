@@ -61,12 +61,12 @@ class LLMClassifier(BaseClassifier):
 
         return prompt
     
-    def classify(self, problem_text: str) -> Tuple[str, float, str, bool, bool]:
+    def classify(self, problem_text: str) -> Tuple[str, float, str, bool]:
         """
-        Classify user's problem, check relevance and urgency in single LLM call
+        Classify user's problem, check urgency in single LLM call
         
         Returns:
-            Tuple[category_id, confidence, reasoning, is_urgent, is_relevant]
+            Tuple[category_id, confidence, reasoning, is_urgent]
         """
         # Step 0: Sanitize input to prevent prompt injection
         sanitized_text = sanitize_prompt_input(problem_text, max_length=2000)
@@ -75,7 +75,7 @@ class LLMClassifier(BaseClassifier):
         similar_examples = self._get_similar_examples(sanitized_text, top_k=5)
         
         if not similar_examples:
-            return "other", 0.5, "No similar examples found in database", False, False
+            return "other", 0.5, "No similar examples found in database", False
         
         # Step 2: Build few-shot prompt
         prompt = self._build_few_shot_prompt(sanitized_text, similar_examples)
@@ -95,7 +95,6 @@ class LLMClassifier(BaseClassifier):
                 content = content.strip()
             
             result = json.loads(content)
-            is_relevant = bool(result.get("is_relevant", True))
             category_id = result.get("category_id", "other")
             confidence = float(result.get("confidence", 0.5))
             reasoning = result.get("reasoning", "")
@@ -105,12 +104,12 @@ class LLMClassifier(BaseClassifier):
             # Check that category exists
             category = self.session.get(Category, category_id)
             if not category:
-                return "other", 0.5, f"Category {category_id} not found", False, is_relevant
+                return "other", 0.5, f"Category {category_id} not found", False
             
-            return category_id, confidence, reasoning, is_urgent, is_relevant
+            return category_id, confidence, reasoning, is_urgent
             
         except (json.JSONDecodeError, KeyError, ValueError) as e:
-            return "other", 0.5, f"LLM response parsing error: {str(e)}", False, False
+            return "other", 0.5, f"LLM response parsing error: {str(e)}", False
     
     def get_category_info(self, category_id: str) -> Category | None:
         """Get category information"""
@@ -118,15 +117,14 @@ class LLMClassifier(BaseClassifier):
     
     def classify_with_category(self, problem_text: str) -> dict:
         """
-        Classify problem and return full response with category info, relevance and urgency check
+        Classify problem and return full response with category info and urgency check
         
         Performs analysis:
-        1. Relevance check - is this a utility problem?
-        2. Urgency detection via LLM
-        3. Category classification via RAG + few-shot learning
+        1. Urgency detection via LLM
+        2. Category classification via RAG + few-shot learning
         """
         # Classify category, check relevance and urgency in one call
-        category_id, confidence, reasoning, is_urgent, is_relevant = self.classify(problem_text)
+        category_id, confidence, reasoning, is_urgent = self.classify(problem_text)
         category = self.get_category_info(category_id)
         
         if not category:
@@ -138,6 +136,5 @@ class LLMClassifier(BaseClassifier):
             "category_description": category.description,
             "confidence": confidence,
             "reasoning": reasoning,
-            "is_urgent": is_urgent,
-            "is_relevant": is_relevant
+            "is_urgent": is_urgent
         }

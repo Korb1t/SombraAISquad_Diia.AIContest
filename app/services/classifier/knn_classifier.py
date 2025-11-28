@@ -7,24 +7,17 @@ from app.db_models import Example
 from app.llm.client import get_embeddings
 from app.services.classifier.base_classifier import BaseClassifier
 
-# TODO: Remove is_relevant as field and add as new category
 class KNNClassifier(BaseClassifier):
     """
     Math-based classifier using Vector Voting.
     Performs simultaneous multi-label classification for category and urgency.
     """
 
-    # TEMP VARIABLE WHILE DB IS BEING TAGGED FOR URGENCY
-    MAX_URGENCY_TAGGED_ID = 2370  # Only IDs < 2370 are reliably tagged for urgency
-
-    # TODO: Implement is_relevant classification
-    is_relevant = True
-
     def __init__(self, session: Session):
         super().__init__(session)
         self.embeddings = get_embeddings()
 
-    def _get_nearest_neighbors(self, query_embedding, k: int, filter_max_id: int = None) -> list[Example]:
+    def _get_nearest_neighbors(self, query_embedding, k: int) -> list[Example]:
         """
         Finds the K nearest neighbors based on cosine distance.
         """
@@ -34,9 +27,6 @@ class KNNClassifier(BaseClassifier):
             .limit(k)
         )
 
-        if filter_max_id is not None:
-            statement = statement.where(Example.id <= filter_max_id)
-             
         return self.session.exec(statement).all()
 
     def classify(self, problem_text: str) -> Tuple[str, float, str, bool]:
@@ -54,7 +44,7 @@ class KNNClassifier(BaseClassifier):
         neighbors_category = self._get_nearest_neighbors(query_embedding, k_neighbors)
         
         if not neighbors_category:
-            return "other", 0.0, "No historical examples found for category classification.", False, self.is_relevant
+            return "other", 0.0, "No historical examples found for category classification.", False
 
         # --- A. VOTING FOR CATEGORY (Multi-Class) ---
         votes_cat = [ex.category_id for ex in neighbors_category]
@@ -65,8 +55,7 @@ class KNNClassifier(BaseClassifier):
         # 2. FIND NEIGHBORS FOR URGENCY (Use only 2000 tagged)
         neighbors_urgency = self._get_nearest_neighbors(
             query_embedding, 
-            k_neighbors, 
-            filter_max_id=self.MAX_URGENCY_TAGGED_ID
+            k_neighbors
         )
         
         # If no neighbors found even in tagged zone, we cannot determine urgency.
@@ -75,9 +64,8 @@ class KNNClassifier(BaseClassifier):
              
              reasoning = (
                  f"[KNN] Category: '{winner_cat}' ({count_cat}/{len(neighbors_category)} votes). "
-                 f"Urgency: Cannot be determined (No tagged neighbors found below ID {self.MAX_URGENCY_TAGGED_ID})."
              )
-             return winner_cat, round(confidence_cat, 2), reasoning, is_urgent_result, self.is_relevant
+             return winner_cat, round(confidence_cat, 2), reasoning, is_urgent_result
 
 
         # --- B. VOTING FOR URGENCY (Binary) ---
@@ -103,4 +91,4 @@ class KNNClassifier(BaseClassifier):
             f"Confidence in Urgency: {round(confidence_urgent, 2)}"
         )
 
-        return winner_cat, round(confidence_cat, 2), reasoning, is_urgent_result, self.is_relevant
+        return winner_cat, round(confidence_cat, 2), reasoning, is_urgent_result
