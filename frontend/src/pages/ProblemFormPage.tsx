@@ -165,6 +165,14 @@ export function ProblemFormPage({
       }, {
         onSuccess: (data) => {
           console.log('API відповідь:', data);
+          
+          // Перевірка на невалідну категорію
+          if (data?.classification?.category_id === 'invalid') {
+            setErrorMessage('Запит не валідний. Спробуйте переформулювати проблему та надіслати знову.');
+            setShowErrorModal(true);
+            return;
+          }
+          
           onSubmit(problemText.trim(), data);
         },
         onError: (error: any) => {
